@@ -154,6 +154,7 @@
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="graphics_1.cpp" />
     <ClCompile Include="Plane.cpp" />
+    <ClCompile Include="Planetary.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="random.cpp" />
   </ItemGroup>
@@ -164,6 +165,7 @@
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="Plane.h" />
+    <ClInclude Include="Planetary.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="random.h" />
   </ItemGroup>

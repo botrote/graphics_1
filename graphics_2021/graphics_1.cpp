@@ -10,7 +10,7 @@
 #include "Drawer.h"
 
 void drawerUpdate();
-void stateUpdate();
+void stateUpdate(int value);
 void onkeyInput(unsigned char key, int x, int y);
 void onSpecialInput(int key, int x, int y);
 void init(int argc, char** argv);
@@ -23,7 +23,8 @@ int main(int argc, char** argv)
 
 	init(argc, argv);
 
-	glutIdleFunc(stateUpdate);
+	//glutIdleFunc(stateUpdate);
+	glutTimerFunc(1, stateUpdate, 1);
 	glutDisplayFunc(drawerUpdate);
 	glutKeyboardFunc(onkeyInput);
 	glutSpecialFunc(onSpecialInput);
@@ -39,14 +40,15 @@ void init(int argc, char** argv)
 	glutInitWindowSize(500, 500);
 	glutInitWindowPosition(100, 100);
 	glutCreateWindow(argv[0]);
-	glClearColor(1, 1, 1, 0);		//배경색상 정하기
+	glClearColor(0, 0, 0, 0);		//배경색상 정하기
 	glShadeModel(GL_FLAT);
 
 }
 
-void stateUpdate()
+void stateUpdate(int value)
 {
 	gameManager->updateState();
+	glutTimerFunc(1, stateUpdate, 1);
 }
 
 void drawerUpdate()

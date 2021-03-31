@@ -3,10 +3,15 @@
 #include <GL/glut.h>
 #include "Plane.h"
 #include "Drawer.h"
+#include <iostream>
 
 Plane::Plane() : speed(0.05)
 {
 	setColor(Drawer::getRandomColor());
+	wingAngle = 0;
+	cannonAngle = 45;
+	wingGetsWider = true;
+	cannonGetsWider = true;
 }
 
 Plane::~Plane()
@@ -42,6 +47,35 @@ void Plane::move(Direction dir)
 	}
 }
 
+void Plane::updateParts()
+{
+	if (wingGetsWider == true)
+	{
+		wingAngle += 0.1;
+		if (wingAngle >= 30)
+			wingGetsWider = false;
+	}
+	else
+	{
+		wingAngle -= 0.1;
+		if (wingAngle <= 0)
+			wingGetsWider = true;
+	}
+
+	if (cannonGetsWider == true)
+	{
+		cannonAngle += 0.1;
+		if (cannonAngle >= 90)
+			cannonGetsWider = false;
+	}
+	else
+	{
+		cannonAngle -= 0.1;
+		if (cannonAngle <= 45)
+			cannonGetsWider = true;
+	}
+}
+
 void Plane::setColor(Color color)
 {
 	this->color = color;
@@ -60,4 +94,14 @@ Color Plane::getColor()
 int Plane::getHealth()
 {
 	return health;
+}
+
+float Plane::getWingAngle()
+{
+	return wingAngle;
+}
+
+float Plane::getCannonAngle()
+{
+	return cannonAngle;
 }

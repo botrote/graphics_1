@@ -4,6 +4,7 @@
 #include "Player.h"
 #include "Enemy.h"
 #include "Bullet.h"
+#include "Planetary.h"
 
 class GameManager
 {
@@ -14,6 +15,7 @@ public:
 	Enemy* getEnemy();
 	int getLevel();
 	std::list<Bullet*> getBullets();
+	std::list<Planetary*> getPlanetaries();
 	bool isAllPass();
 	bool isAllFail();
 	void onKeyInput(char key);
@@ -30,6 +32,7 @@ private:
 	Player* player;
 	Enemy* enemy;
 	std::list<Bullet*> bullets;
+	std::list<Planetary*> planetaries;
 	int level;
 	bool allPass;
 	bool allFail;

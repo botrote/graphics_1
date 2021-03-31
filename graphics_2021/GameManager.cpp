@@ -22,6 +22,11 @@ GameManager::GameManager()
 	allPass = false;
 	allFail = false;
 	srand(time(0));
+
+	Pos plaPos1 = { Random::getRandomFloat(0, 0.5), Random::getRandomFloat(0, 0.5) };
+	Planetary* planetary1 = new Planetary(plaPos1, 0.10, 0.05, 0.015);
+
+	planetaries.push_back(planetary1);
 }
 
 GameManager::~GameManager()
@@ -165,10 +170,15 @@ void GameManager::updateState()
 	enemyShootTimer++;
 	enemyMoveTimer++;
 
+	if (player != NULL)
+		player->updateParts();
+	if (enemy != NULL)
+		enemy->updateParts();
+
 	if (enemy == NULL)				//다음 레벨 enemy가 나타날 때까지 대기시간
 	{
 		enemyRespawnTimer++;
-		if (enemyRespawnTimer > 4000)
+		if (enemyRespawnTimer > 2000)
 		{
 			enemyRespawnTimer = 0;
 			enemy = new Enemy(level);
@@ -182,7 +192,7 @@ void GameManager::updateState()
 	}
 	bullets.remove_if(bulletExpired);	//화면에서 지울 bullet 검사.
 	
-	if (enemyShootTimer > 3400 - 200 * level)		//레벨마다 enemy의 공격속도가 다름
+	if (enemyShootTimer > 2500 - 275 * level)		//레벨마다 enemy의 공격속도가 다름
 	{
 		enemyShootTimer = 0;
 		if (enemy != NULL)
@@ -194,7 +204,7 @@ void GameManager::updateState()
 		}
 	}
 
-	if (enemyMoveTimer > 1500 - 100 * level)		//레벨마다 enemy의 이동속도가 다름
+	if (enemyMoveTimer > 800 - 100 * level)		//레벨마다 enemy의 이동속도가 다름
 	{
 		enemyMoveTimer = 0;
 		if(enemy != NULL)
@@ -206,6 +216,9 @@ void GameManager::updateState()
 				enemy->move(Direction::RIGHT);
 		}
 	}
+
+	for (Planetary* p : planetaries)
+		p->update();
 
 	glutPostRedisplay();
 }
@@ -224,6 +237,7 @@ int GameManager::getLevel()
 {
 	return level;
 }
+
 std::list<Bullet*> GameManager::getBullets()
 {
 	return bullets;
@@ -237,4 +251,9 @@ bool GameManager::isAllPass()
 bool GameManager::isAllFail()
 {
 	return allFail;
+}
+
+std::list<Planetary*> GameManager::getPlanetaries()
+{
+	return planetaries;
 }

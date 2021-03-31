@@ -7,7 +7,7 @@
 bool isNear(Pos p1, Pos p2, float target);
 float angle_set[5] = { 0, 0.0001, -0.0001, 0.0002, -0.0002 };
 
-Bullet::Bullet(Team team, Type type, int angle) : speed(0.0005)
+Bullet::Bullet(Team team, Type type, int angle) : speed(0.00075)
 {
 	this->team = team;
 	this->type = type;

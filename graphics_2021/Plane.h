@@ -15,6 +15,9 @@ public:
 	Pos getPos();
 	int getHealth();
 	virtual void onHit() = 0;
+	void updateParts();
+	float getWingAngle();
+	float getCannonAngle();
 	
 protected:
 	int health;
@@ -24,6 +27,10 @@ protected:
 private:
 	Color color;
 	const float speed;
+	float wingAngle;
+	bool wingGetsWider;
+	float cannonAngle;
+	bool cannonGetsWider;
 	
 };
 
