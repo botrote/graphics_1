@@ -8,11 +8,11 @@ public:
 	Player();
 	~Player();
 	void onHit();
-
-protected:
+	void onItemHit();
+	int getBulletLevel();
 
 private:
-	
+	int bullet_level;
 };
 
 

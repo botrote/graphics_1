@@ -3,6 +3,7 @@
 #include <GL/glut.h>
 #include "Drawer.h"
 #include "random.h"
+#include <iostream>
 
 Color Drawer::getRandomColor()
 {
@@ -16,34 +17,42 @@ Color Drawer::getRandomColor()
 void Drawer::drawGame(GameManager* gameManager)
 {
 	glClear(GL_COLOR_BUFFER_BIT);
-
-	std::list<Bullet*> bullets = gameManager->getBullets();
-	for (Bullet* b : bullets)
-	{
-		Pos bulletPos = b->getPos();
-		Color bulletColor = b->getColor();
-		glColor3f(bulletColor.r, bulletColor.g, bulletColor.b);
-		glRectf(bulletPos.x - 0.03, bulletPos.y - 0.03, bulletPos.x + 0.03, bulletPos.y + 0.03);
-	}
+	glMatrixMode(GL_MODELVIEW);
 
 	Player* player = gameManager->getPlayer();
 	if (player != NULL)
 	{
+		glLoadIdentity();
 		Pos playerPos = player->getPos();
 		Color playerColor = player->getColor();
 		glColor3f(playerColor.r, playerColor.g, playerColor.b);
-		glRectf(playerPos.x - 0.1, playerPos.y - 0.1, playerPos.x + 0.1, playerPos.y + 0.1);
+		glTranslatef(playerPos.x, playerPos.y, 0);
+		glRectf(-0.1, -0.1, 0.1, 0.1);
 	}
 
 	Enemy* enemy = gameManager->getEnemy();
 	if (enemy != NULL)
 	{
+		glLoadIdentity();
 		Pos enemyPos = enemy->getPos();
 		Color enemyColor = enemy->getColor();
 		glColor3f(enemyColor.r, enemyColor.g, enemyColor.b);
-		glRectf(enemyPos.x - 0.1, enemyPos.y - 0.1, enemyPos.x + 0.1, enemyPos.y + 0.1);
+		glTranslatef(enemyPos.x, enemyPos.y, 0);
+		glRectf(-0.1, -0.1, 0.1, 0.1);
 	}
 
+	std::list<Bullet*> bullets = gameManager->getBullets();
+	for (Bullet* b : bullets)
+	{
+		glLoadIdentity();
+		Pos bulletPos = b->getPos();
+		Color bulletColor = b->getColor();
+		glColor3f(bulletColor.r, bulletColor.g, bulletColor.b);
+		glTranslatef(bulletPos.x, bulletPos.y, 0);
+		glRectf(-0.03, -0.03, 0.03, 0.03);
+	}
+
+	glLoadIdentity();
 	drawUI(player, enemy, gameManager->isAllPass(), gameManager->isAllFail());
 
 	glutSwapBuffers();

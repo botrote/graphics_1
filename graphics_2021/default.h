@@ -2,6 +2,7 @@
 
 enum Direction { UP, DOWN, LEFT, RIGHT };
 enum Team { PLAYER, ENEMY };
+enum Type { BULLET, ITEM};
 
 struct Pos
 {

@@ -1,6 +1,8 @@
+#include <windows.h>
+#include <GL/GL.h>
+#include <GL/glut.h>
 #include "Plane.h"
 #include "Drawer.h"
-
 
 Plane::Plane() : speed(0.05)
 {

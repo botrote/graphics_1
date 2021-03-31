@@ -34,14 +34,19 @@ void GameManager::onKeyInput(char key)
 	if (level >= 6 || player == NULL)
 		return;
 
+	int bullet_level = player->getBulletLevel();
+
 	switch (key) 
 	{
 	case ' ':		
 		{
 		if (allFail)
 			return;
-		Bullet* temp = new Bullet(Team::PLAYER);
-		bullets.push_back(temp);
+		for (int i = 0; i < bullet_level; i++)
+		{
+			Bullet* temp = new Bullet(Team::PLAYER, Type::BULLET, i);
+			bullets.push_back(temp);
+		}
 		break;
 		}
 	case 'c':
@@ -78,18 +83,25 @@ void GameManager::onSpecialInput(int key)
 	glutPostRedisplay();
 }
 
-void GameManager::onPlayerHit()
+void GameManager::onPlayerHit(Type type)
 {
-	if (allPass)
+	if (type == Type::BULLET)
 	{
-		return;
+		if (allPass)
+		{
+			return;
+		}
+		if (allFail)
+		{
+			onPlayerDeath();
+			return;
+		}
+		player->onHit();
 	}
-	if (allFail)
+	else
 	{
-		onPlayerDeath();
-		return;
+		player->onItemHit();
 	}
-	player->onHit();
 }
 
 void GameManager::onPlayerDeath()
@@ -110,22 +122,35 @@ void GameManager::onEnemyHit()
 	enemy->onHit();
 }
 
+bool bulletExpired(Bullet* b)
+{
+	return b->isExpired();
+}
+
+bool bulletEnemy(Bullet* b)
+{
+	return b->isEnemyBullet();
+}
+
+
 void GameManager::onEnemyDeath()
 {
 	std::cout << "Enemy " << level << " death!\n";
 	delete(enemy);
 	enemy = NULL;
+
+
+	bullets.remove_if(bulletEnemy);	//화면에서 지울 bullet 검사.
+
+	Bullet* temp = new Bullet(Team::ENEMY, Type::ITEM, 0);
+	bullets.push_back(temp);
+
 	level++;
 	if (level >= 6)
 	{
 		std::cout << "You win!\n";
 		//exit(0);
 	}
-}
-
-bool bulletExpired(Bullet* b)
-{
-	return b->isExpired();
 }
 
 void GameManager::updateState()
@@ -140,7 +165,7 @@ void GameManager::updateState()
 	enemyShootTimer++;
 	enemyMoveTimer++;
 
-	if (enemy == NULL)
+	if (enemy == NULL)				//다음 레벨 enemy가 나타날 때까지 대기시간
 	{
 		enemyRespawnTimer++;
 		if (enemyRespawnTimer > 4000)
@@ -150,24 +175,26 @@ void GameManager::updateState()
 		}
 	}
 
-	for (Bullet* b : bullets)
+	for (Bullet* b : bullets)		//모든 bullet을 움직이고, 충돌검사함.
 	{
 		b->move();
 		b->checkBulletHit();
 	}
-	bullets.remove_if(bulletExpired);
-
-	if (enemyShootTimer > 3400 - 200 * level)
+	bullets.remove_if(bulletExpired);	//화면에서 지울 bullet 검사.
+	
+	if (enemyShootTimer > 3400 - 200 * level)		//레벨마다 enemy의 공격속도가 다름
 	{
 		enemyShootTimer = 0;
 		if (enemy != NULL)
 		{
-			Bullet* temp = new Bullet(Team::ENEMY);
-			bullets.push_back(temp);
+			for (int i = 0; i < level; i++) {
+				Bullet* temp = new Bullet(Team::ENEMY, Type::BULLET, i);
+				bullets.push_back(temp);
+			}
 		}
 	}
 
-	if (enemyMoveTimer > 1500 - 100 * level)
+	if (enemyMoveTimer > 1500 - 100 * level)		//레벨마다 enemy의 이동속도가 다름
 	{
 		enemyMoveTimer = 0;
 		if(enemy != NULL)
@@ -193,6 +220,10 @@ Enemy* GameManager::getEnemy()
 	return enemy;
 }
 
+int GameManager::getLevel()
+{
+	return level;
+}
 std::list<Bullet*> GameManager::getBullets()
 {
 	return bullets;

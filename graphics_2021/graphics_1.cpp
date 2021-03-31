@@ -17,7 +17,7 @@ void init(int argc, char** argv);
 
 GameManager* gameManager;
 
-void main(int argc, char** argv) 
+int main(int argc, char** argv) 
 {
 	gameManager = GameManager::getInstance();
 
@@ -28,6 +28,8 @@ void main(int argc, char** argv)
 	glutKeyboardFunc(onkeyInput);
 	glutSpecialFunc(onSpecialInput);
 	glutMainLoop();
+
+	return 0;
 }
 
 void init(int argc, char** argv)
@@ -39,6 +41,7 @@ void init(int argc, char** argv)
 	glutCreateWindow(argv[0]);
 	glClearColor(1, 1, 1, 0);		//배경색상 정하기
 	glShadeModel(GL_FLAT);
+
 }
 
 void stateUpdate()

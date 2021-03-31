@@ -11,6 +11,7 @@ public:
 	static void drawUI(Player* player, Enemy* enemy, bool allPass, bool allFail);
 	static Color getRandomColor();
 private:
+	bool type;
 	//static void drawThing(Drawable drawble);
 	//static void drawPlane(Plane* plane);
 	//static void drawBullet(Bullet* bullet);

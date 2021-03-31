@@ -12,12 +12,13 @@ public:
 	static GameManager* getInstance();
 	Player* getPlayer();
 	Enemy* getEnemy();
+	int getLevel();
 	std::list<Bullet*> getBullets();
 	bool isAllPass();
 	bool isAllFail();
 	void onKeyInput(char key);
 	void onSpecialInput(int key);
-	void onPlayerHit();
+	void onPlayerHit(Type type);
 	void onPlayerDeath();
 	void onEnemyHit();
 	void onEnemyDeath();
