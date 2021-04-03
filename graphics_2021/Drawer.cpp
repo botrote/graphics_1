@@ -25,6 +25,10 @@ void Drawer::drawGame(GameManager* gameManager)
 	for (Planetary* p : planetaries)
 		drawPlanetary(p);
 
+	std::list<Bullet*> bullets = gameManager->getBullets();
+	for (Bullet* b : bullets)
+		drawBullet(b);
+
 	Player* player = gameManager->getPlayer();
 	if (player != NULL)
 		drawPlayer(player);
@@ -32,10 +36,6 @@ void Drawer::drawGame(GameManager* gameManager)
 	Enemy* enemy = gameManager->getEnemy();
 	if (enemy != NULL)
 		drawEnemy(enemy);
-
-	std::list<Bullet*> bullets = gameManager->getBullets();
-	for (Bullet* b : bullets)
-		drawBullet(b);
 
 	glLoadIdentity();
 	drawUI(player, enemy, gameManager->isAllPass(), gameManager->isAllFail());
@@ -45,7 +45,19 @@ void Drawer::drawGame(GameManager* gameManager)
 
 void drawCircle(float radius)
 {
-	glRectf(-radius, -radius, radius, radius);
+	glBegin(GL_POLYGON);
+	for (int i = 0; i < 360; i += 2)
+	{
+		double angle = i * 3.141592 / 180;
+		double x = radius * cos(angle);
+		double y = radius * sin(angle);
+		glVertex2f(x, y);
+	}
+	glEnd();
+	glFinish();
+
+
+//출처: https://blog.amaorche.com/25 [팬더노트]
 }
 
 void Drawer::drawPlanetary(Planetary* planetary)
@@ -183,7 +195,13 @@ void Drawer::drawBullet(Bullet* bullet)
 	Color bulletColor = bullet->getColor();
 	glColor3f(bulletColor.r, bulletColor.g, bulletColor.b);
 	glTranslatef(bulletPos.x, bulletPos.y, 0);
-	glRectf(-0.03, -0.03, 0.03, 0.03);
+	if (bullet->getType() == Type::ITEM)
+	{
+		glRotatef(45, 0, 0, 1);
+		glRectf(-0.03, -0.03, 0.03, 0.03);
+	}
+	else
+		glRectf(-0.03, -0.03, 0.03, 0.03);
 }
 
 void Drawer::drawUI(Player* player, Enemy* enemy, bool allPass, bool allFail)

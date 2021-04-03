@@ -3,11 +3,13 @@
 #include "GameManager.h"
 #include <cmath>
 #include "random.h"
+#include <iostream>
 
 bool isNear(Pos p1, Pos p2, float target);
+bool isRectCollision(Pos center1, float width1, float height1, Pos center2, float width2, float height2);
 float angle_set[5] = { 0, 0.0001, -0.0001, 0.0002, -0.0002 };
 
-Bullet::Bullet(Team team, Type type, int angle) : speed(0.00075)
+Bullet::Bullet(Team team, Type type, int angle) : speed(0.001)
 {
 	this->team = team;
 	this->type = type;
@@ -17,14 +19,14 @@ Bullet::Bullet(Team team, Type type, int angle) : speed(0.00075)
 	if (team == Team::PLAYER)
 	{
 		position = GameManager::getInstance()->getPlayer()->getPos();
+		position.y += 0.1;
 		temp.r = 0;
 		temp.g = 1;
 		temp.b = 0;
 	}
 	else if (type == Type::ITEM)
 	{
-		position.x = Random::getRandomFloat(-0.7, 0.7);
-		position.y = 0.7;
+		position = GameManager::getInstance()->getEnemy()->getPos();
 		temp.r = 1;
 		temp.g = 1;
 		temp.b = 0;
@@ -32,6 +34,7 @@ Bullet::Bullet(Team team, Type type, int angle) : speed(0.00075)
 	else
 	{
 		position = GameManager::getInstance()->getEnemy()->getPos();
+		position.y -= 0.1;
 		temp.r = 0;
 		temp.g = 0;
 		temp.b = 1;
@@ -94,7 +97,11 @@ void Bullet::checkBulletHit()
 		Enemy* enemy = GameManager::getInstance()->getEnemy();
 		if (enemy == NULL)
 			return;
-		if (isNear(position, enemy->getPos(), 0.1))
+		Pos enemyPos = enemy->getPos();
+		Pos enemyWingPos = enemyPos;
+		enemyWingPos.y += 0.09;
+		if (isRectCollision(enemyPos, 0.2, 0.2, position, 0.06, 0.06) //몸체 충돌검사
+			|| isRectCollision(enemyWingPos, 0.4, 0.05, position, 0.06, 0.06)) //날개 충돌검사
 		{
 			GameManager::getInstance()->onEnemyHit();
 			isHit = true;
@@ -105,7 +112,11 @@ void Bullet::checkBulletHit()
 		Player* player = GameManager::getInstance()->getPlayer();
 		if (player == NULL)
 			return;
-		if (isNear(position, player->getPos(), 0.1))
+		Pos playerPos = player->getPos();
+		Pos playerWingPos = playerPos;
+		playerWingPos.y -= 0.09;
+		if (isRectCollision(playerPos, 0.2, 0.2, position, 0.06, 0.06) //몸체 충돌검사
+		    || isRectCollision(playerWingPos, 0.4, 0.05, position, 0.06, 0.06)) // 날개 충돌검사
 		{
 			GameManager::getInstance()->onPlayerHit(type);
 			isHit = true;
@@ -119,6 +130,26 @@ bool isNear(Pos p1, Pos p2, float target)
 	float distY = p1.y - p2.y;
 
 	return (pow(distX, 2) + pow(distY, 2)) < pow(target, 2);
+}
+
+bool isRectCollision(Pos center1, float width1, float height1, Pos center2, float width2, float height2)
+{
+	Pos rect1LeftDown = { center1.x - 0.5 * width1, center1.y - 0.5 * height1 };
+	Pos rect1RightUp = { center1.x + 0.5 * width1, center1.y + 0.5 * height1 };
+
+	Pos rect2Positions[4] = { {center2.x - 0.5 * width2, center2.y - 0.5 * height2},
+							  {center2.x - 0.5 * width2, center2.y + 0.5 * height2},
+							  {center2.x + 0.5 * width2, center2.y - 0.5 * height2},
+							  {center2.x + 0.5 * width2, center2.y + 0.5 * height2}
+							};
+
+	for (int i = 0; i < 4; i++)
+	{
+		Pos cur = rect2Positions[i];
+		if (cur.x > rect1LeftDown.x && cur.x < rect1RightUp.x && cur.y > rect1LeftDown.y && cur.y < rect1RightUp.y)
+			return true;
+	}
+	return false;
 }
 
 Team Bullet::getTeam()

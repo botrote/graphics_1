@@ -6,6 +6,7 @@
 #include "random.h"
 
 GameManager* GameManager::instance = NULL;
+int bulletRefreshTimer = 0;
 
 GameManager* GameManager::getInstance()
 {
@@ -25,8 +26,17 @@ GameManager::GameManager()
 
 	Pos plaPos1 = { Random::getRandomFloat(0, 0.5), Random::getRandomFloat(0, 0.5) };
 	Planetary* planetary1 = new Planetary(plaPos1, 0.10, 0.05, 0.015);
-
 	planetaries.push_back(planetary1);
+
+	Pos plaPos2 = { Random::getRandomFloat(-0.5, 0), Random::getRandomFloat(-0.5, 0) };
+	Planetary* planetary2 = new Planetary(plaPos2, 0.075, 0.03, 0.01);
+	planetaries.push_back(planetary2);
+
+	/*
+	Pos plaPos3 = { Random::getRandomFloat(-1, 1), Random::getRandomFloat(-1, 1) };
+	Planetary* planetary3 = new Planetary(plaPos3, 0.15, 0.075, 0.05);
+	planetaries.push_back(planetary3);
+	*/
 }
 
 GameManager::~GameManager()
@@ -49,9 +59,13 @@ void GameManager::onKeyInput(char key)
 			return;
 		for (int i = 0; i < bullet_level; i++)
 		{
-			Bullet* temp = new Bullet(Team::PLAYER, Type::BULLET, i);
-			bullets.push_back(temp);
+			if (bulletRefreshTimer < 0)
+			{
+				Bullet* temp = new Bullet(Team::PLAYER, Type::BULLET, i);
+				bullets.push_back(temp);
+			}
 		}
+		bulletRefreshTimer = 500;
 		break;
 		}
 	case 'c':
@@ -141,14 +155,14 @@ bool bulletEnemy(Bullet* b)
 void GameManager::onEnemyDeath()
 {
 	std::cout << "Enemy " << level << " death!\n";
-	delete(enemy);
-	enemy = NULL;
-
-
+	
 	bullets.remove_if(bulletEnemy);	//화면에서 지울 bullet 검사.
 
 	Bullet* temp = new Bullet(Team::ENEMY, Type::ITEM, 0);
 	bullets.push_back(temp);
+
+	delete(enemy);
+	enemy = NULL;
 
 	level++;
 	if (level >= 6)
@@ -169,6 +183,7 @@ void GameManager::updateState()
 
 	enemyShootTimer++;
 	enemyMoveTimer++;
+	bulletRefreshTimer--;
 
 	if (player != NULL)
 		player->updateParts();
