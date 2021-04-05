@@ -65,7 +65,8 @@ void GameManager::onKeyInput(char key)
 				bullets.push_back(temp);
 			}
 		}
-		bulletRefreshTimer = 500;
+		if (bulletRefreshTimer < 0)
+			bulletRefreshTimer = 2000;
 		break;
 		}
 	case 'c':
@@ -183,7 +184,7 @@ void GameManager::updateState()
 
 	enemyShootTimer++;
 	enemyMoveTimer++;
-	bulletRefreshTimer--;
+	bulletRefreshTimer -= 3 + (player->getBulletLevel());
 
 	if (player != NULL)
 		player->updateParts();
@@ -193,7 +194,7 @@ void GameManager::updateState()
 	if (enemy == NULL)				//다음 레벨 enemy가 나타날 때까지 대기시간
 	{
 		enemyRespawnTimer++;
-		if (enemyRespawnTimer > 2000)
+		if (enemyRespawnTimer > 1000)
 		{
 			enemyRespawnTimer = 0;
 			enemy = new Enemy(level);
@@ -207,7 +208,7 @@ void GameManager::updateState()
 	}
 	bullets.remove_if(bulletExpired);	//화면에서 지울 bullet 검사.
 	
-	if (enemyShootTimer > 2500 - 275 * level)		//레벨마다 enemy의 공격속도가 다름
+	if (enemyShootTimer > 1500 - 150 * level)		//레벨마다 enemy의 공격속도가 다름
 	{
 		enemyShootTimer = 0;
 		if (enemy != NULL)
@@ -219,7 +220,7 @@ void GameManager::updateState()
 		}
 	}
 
-	if (enemyMoveTimer > 800 - 100 * level)		//레벨마다 enemy의 이동속도가 다름
+	if (enemyMoveTimer > 700 - 100 * level)		//레벨마다 enemy의 이동속도가 다름
 	{
 		enemyMoveTimer = 0;
 		if(enemy != NULL)

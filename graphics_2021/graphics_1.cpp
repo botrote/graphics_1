@@ -48,7 +48,7 @@ void init(int argc, char** argv)
 void stateUpdate(int value)
 {
 	gameManager->updateState();
-	glutTimerFunc(1, stateUpdate, 1);
+	glutTimerFunc(1, stateUpdate, 100);
 }
 
 void drawerUpdate()
