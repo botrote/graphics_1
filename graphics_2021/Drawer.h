@@ -17,4 +17,5 @@ private:
 	static void drawEnemy(Enemy* enemy);
 	static void drawBullet(Bullet* bullet);
 	static void drawUI(Player* player, Enemy* enemy, bool allPass, bool allFail);
+	static void drawGrid();
 };

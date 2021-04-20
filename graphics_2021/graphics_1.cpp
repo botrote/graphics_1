@@ -37,12 +37,15 @@ void init(int argc, char** argv)
 {
 	glutInit(&argc, argv);			//GLUT라이브러리를 초기화하고 기반 플랫폼의 윈도우 시스템과 연결
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-	glutInitWindowSize(500, 500);
-	glutInitWindowPosition(100, 100);
+	glutInitWindowSize(750, 800);
+	glutInitWindowPosition(10, 10);
 	glutCreateWindow(argv[0]);
 	glClearColor(0, 0, 0, 0);		//배경색상 정하기
 	glShadeModel(GL_FLAT);
 
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluOrtho2D(-1.5, 1.5, -1.5, 1.5);
 }
 
 void stateUpdate(int value)

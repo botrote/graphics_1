@@ -21,6 +21,8 @@ void Drawer::drawGame(GameManager* gameManager)
 	glClear(GL_COLOR_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 
+	drawGrid();
+
 	std::list<Planetary*> planetaries = gameManager->getPlanetaries();
 	for (Planetary* p : planetaries)
 		drawPlanetary(p);
@@ -45,19 +47,23 @@ void Drawer::drawGame(GameManager* gameManager)
 
 void drawCircle(float radius)
 {
-	glBegin(GL_POLYGON);
-	for (int i = 0; i < 360; i += 2)
-	{
-		double angle = i * 3.141592 / 180;
-		double x = radius * cos(angle);
-		double y = radius * sin(angle);
-		glVertex2f(x, y);
-	}
-	glEnd();
-	glFinish();
+	//glBegin(GL_POLYGON);
+	//for (int i = 0; i < 360; i += 2)
+	//{
+	//	double angle = i * 3.141592 / 180;
+	//	double x = radius * cos(angle);
+	//	double y = radius * sin(angle);
+	//	glVertex2f(x, y);
+	//}
+	//glEnd();
+	//glFinish();
 
+	GLUquadricObj* obj;
+	obj = gluNewQuadric();
+	gluQuadricDrawStyle(obj, GLU_FILL);		//line만 그릴건지, 색으로 채울건지 등 모드 지정
 
-//출처: https://blog.amaorche.com/25 [팬더노트]
+	gluSphere(obj, radius, 20, 20);
+
 }
 
 void Drawer::drawPlanetary(Planetary* planetary)
@@ -240,4 +246,22 @@ void Drawer::drawUI(Player* player, Enemy* enemy, bool allPass, bool allFail)
 			}
 		}
 	}
+}
+
+void Drawer::drawGrid() 
+{
+	float i;
+	glColor3f(0, 0, 0.4);
+	
+	glBegin(GL_LINES);
+	for (i = -1.4; i < 1.5; i += 0.2) {
+		glVertex3f(i, -1.5, 0);
+		glVertex3f(i, 1.5, 0);
+		glVertex3f(-1.5, i, 0);
+		glVertex3f(1.5, i, 0);
+	}
+	glEnd();
+
+	glColor3f(0, 0, 0);
+	glRectf(-1, -1, 1, 1);
 }

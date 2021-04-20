@@ -7,7 +7,7 @@
 
 bool isNear(Pos p1, Pos p2, float target);
 bool isRectCollision(Pos center1, float width1, float height1, Pos center2, float width2, float height2);
-float angle_set[5] = { 0, 0.0001, -0.0001, 0.0002, -0.0002 };
+float angle_set[5] = { 0, 0.00015, -0.00015, 0.0003, -0.0003 };
 
 Bullet::Bullet(Team team, Type type, int angle) : speed(0.001)
 {
