@@ -101,7 +101,7 @@ void Bullet::checkBulletHit()
 		Pos enemyWingPos = enemyPos;
 		enemyWingPos.y += 0.09;
 		if (isRectCollision(enemyPos, 0.2, 0.2, position, 0.06, 0.06) //몸체 충돌검사
-			|| isRectCollision(enemyWingPos, 0.4, 0.05, position, 0.06, 0.06)) //날개 충돌검사
+			|| isRectCollision(enemyWingPos, 0.3, 0.04, position, 0.06, 0.06)) //날개 충돌검사
 		{
 			GameManager::getInstance()->onEnemyHit();
 			isHit = true;
@@ -116,7 +116,7 @@ void Bullet::checkBulletHit()
 		Pos playerWingPos = playerPos;
 		playerWingPos.y -= 0.09;
 		if (isRectCollision(playerPos, 0.2, 0.2, position, 0.06, 0.06) //몸체 충돌검사
-		    || isRectCollision(playerWingPos, 0.4, 0.05, position, 0.06, 0.06)) // 날개 충돌검사
+		    || isRectCollision(playerWingPos, 0.3, 0.04, position, 0.06, 0.06)) // 날개 충돌검사
 		{
 			GameManager::getInstance()->onPlayerHit(type);
 			isHit = true;

@@ -62,7 +62,8 @@ void drawCircle(float radius)
 	obj = gluNewQuadric();
 	gluQuadricDrawStyle(obj, GLU_FILL);		//line만 그릴건지, 색으로 채울건지 등 모드 지정
 
-	gluSphere(obj, radius, 20, 20);
+	//gluSphere(obj, radius, 20, 20);
+	glutWireSphere(radius, 20, 20);
 
 }
 
@@ -107,44 +108,60 @@ void Drawer::drawPlayer(Player* player)
 	glPushMatrix();
 	glLoadIdentity();
 	glTranslatef(playerPos.x, playerPos.y, 0);
-	glRectf(-0.1, -0.1, 0.1, 0.1);
+	//glRectf(-0.1, -0.1, 0.1, 0.1);
+	glutWireCube(0.15);
 
 	//머리
 	glPushMatrix();
 	glTranslatef(0, 0.09, 0);
-	glRectf(-0.04, 0, 0.04, 0.1);
+	glScalef(1, 2, 1);
+	//glRectf(-0.04, 0, 0.04, 0.1);
+	glutWireCube(0.05);
 	glPopMatrix();
 
 	//우측날개
 	glPushMatrix();
-	glTranslatef(0.03f, -0.1f, 0);
-	glRotatef(-(player->getWingAngle()), 0, 0, 1.0);
-	glRectf(0, 0, 0.15f, 0.070);
+	//glTranslatef(0.03f, -0.1f, 0);
+	//glRotatef(-(player->getWingAngle()), 0, 0, 1.0);
+	//glRectf(0, 0, 0.15f, 0.070);
+	glTranslatef(0.085f, -0.085f, 0);
+	glRotatef(45, 0, 0, 1.0);
+	glScalef(1, 1.5, 1);
+	glutWireCube(0.08);
+	glPopMatrix();
 
 	//우측 캐논
+	/*
 	glPushMatrix();
 	glTranslatef(0.15f, 0.0f, 0);
 	glRotatef(+(player->getCannonAngle()), 0, 0, 1.0);
 	glRectf(0.0f, 0.0f, 0.10f, 0.05f);
 	glPopMatrix();
 	glPopMatrix();
+	*/
 
 	//좌측날개
 	glPushMatrix();
-	glTranslatef(-0.03f, -0.1f, 0);
-	glRotatef(+(player->getWingAngle()), 0, 0, 1.0);
-	glRectf(0, 0, -0.15f, 0.070);
+	//glTranslatef(-0.03f, -0.1f, 0);
+	//glRotatef(+(player->getWingAngle()), 0, 0, 1.0);
+	//glRectf(0, 0, -0.15f, 0.070);
+	glTranslatef(-0.085f, -0.085f, 0);
+	glRotatef(-45, 0, 0, 1.0);
+	glScalef(1, 1.5, 1);
+	glutWireCube(0.08);
 
 	//좌측캐논
+	/*
 	glPushMatrix();
 	glTranslatef(-0.15f, 0.0f, 0);
 	glRotatef(-(player->getCannonAngle()), 0, 0, 1.0);
 	glRectf(-0.0f, 0.0f, -0.10f, 0.05f);
 	glPopMatrix();
 	glPopMatrix();
+	*/
 
 	glPopMatrix();
-
+	glPopMatrix();
 }
 
 void Drawer::drawEnemy(Enemy* enemy)
@@ -157,42 +174,59 @@ void Drawer::drawEnemy(Enemy* enemy)
 	glPushMatrix();
 	glLoadIdentity();
 	glTranslatef(enemyPos.x, enemyPos.y, 0);
-	glRectf(-0.1, -0.1, 0.1, 0.1);
+	//glRectf(-0.1, -0.1, 0.1, 0.1);
+	glutWireCube(0.15);
 
 	//머리
 	glPushMatrix();
 	glTranslatef(0, -0.09, 0);
-	glRectf(-0.04, 0, 0.04, -0.1);
+	glScalef(1, 2, 1);
+	//glRectf(-0.04, 0, 0.04, 0.1);
+	glutWireCube(0.05);
 	glPopMatrix();
 
 	//우측날개
 	glPushMatrix();
-	glTranslatef(0.03f, 0.1f, 0);
-	glRotatef(+(enemy->getWingAngle()), 0, 0, 1.0);
-	glRectf(0, 0, 0.15f, -0.070);
+	//glTranslatef(0.03f, -0.1f, 0);
+	//glRotatef(-(player->getWingAngle()), 0, 0, 1.0);
+	//glRectf(0, 0, 0.15f, 0.070);
+	glTranslatef(0.085f, +0.085f, 0);
+	glRotatef(-45, 0, 0, 1.0);
+	glScalef(1, 1.5, 1);
+	glutWireCube(0.08);
+	glPopMatrix();
 
 	//우측 캐논
+	/*
 	glPushMatrix();
 	glTranslatef(0.15f, 0.0f, 0);
 	glRotatef(-(enemy->getCannonAngle()), 0, 0, 1.0);
 	glRectf(0.0f, 0.0f, 0.10f, -0.05f);
 	glPopMatrix();
 	glPopMatrix();
+	*/
 
 	//좌측날개
 	glPushMatrix();
-	glTranslatef(-0.03f, 0.1f, 0);
-	glRotatef(-(enemy->getWingAngle()), 0, 0, 1.0);
-	glRectf(0, 0, -0.15f, -0.070);
+	//glTranslatef(-0.03f, 0.1f, 0);
+	//glRotatef(-(enemy->getWingAngle()), 0, 0, 1.0);
+	//glRectf(0, 0, -0.15f, -0.070);
+	glTranslatef(-0.085f, +0.085f, 0);
+	glRotatef(45, 0, 0, 1.0);
+	glScalef(1, 1.5, 1);
+	glutWireCube(0.08);
 
 	//좌측캐논
+	/*
 	glPushMatrix();
 	glTranslatef(-0.15f, 0.0f, 0);
 	glRotatef(+(enemy->getCannonAngle()), 0, 0, 1.0);
 	glRectf(-0.0f, 0.0f, -0.10f, -0.05f);
 	glPopMatrix();
 	glPopMatrix();
+	*/
 
+	glPopMatrix();
 	glPopMatrix();
 }
 
@@ -206,10 +240,12 @@ void Drawer::drawBullet(Bullet* bullet)
 	if (bullet->getType() == Type::ITEM)
 	{
 		glRotatef(45, 0, 0, 1);
-		glRectf(-0.03, -0.03, 0.03, 0.03);
+		//glRectf(-0.03, -0.03, 0.03, 0.03);
+		glutSolidCube(0.06);
 	}
 	else
-		glRectf(-0.03, -0.03, 0.03, 0.03);
+		glutSolidSphere(0.03, 10, 10);
+		//glRectf(-0.03, -0.03, 0.03, 0.03);
 }
 
 void Drawer::drawUI(Player* player, Enemy* enemy, bool allPass, bool allFail)
@@ -266,4 +302,16 @@ void Drawer::drawGrid()
 
 	glColor3f(0, 0, 0);
 	glRectf(-1, -1, 1, 1);
+}
+
+void Drawer::setView(bool isFirst, Player* player)
+{
+	Pos playerPos = player->getPos();
+
+	//glViewport(0, 0, 800, 800);
+	glLoadIdentity();
+	if (isFirst)
+		gluLookAt(playerPos.x, playerPos.y, 0.5, 10, 10, -0.5, 1, 0, 0);
+	else
+		gluLookAt(playerPos.x, playerPos.y, 0.5, 0.3, 0.3, -0.5, 1, 0, 0);
 }
