@@ -18,4 +18,5 @@ private:
 	static void drawBullet(Bullet* bullet);
 	static void drawUI(Player* player, Enemy* enemy, bool allPass, bool allFail);
 	static void drawGrid();
+	static void setView(bool isFirst, Player* player);
 };

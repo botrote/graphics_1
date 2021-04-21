@@ -17,7 +17,9 @@ Color Drawer::getRandomColor()
 }
 
 void Drawer::drawGame(GameManager* gameManager)
-{
+{	
+	Player* player = gameManager->getPlayer();
+	setView(true,player);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 
@@ -31,7 +33,7 @@ void Drawer::drawGame(GameManager* gameManager)
 	for (Bullet* b : bullets)
 		drawBullet(b);
 
-	Player* player = gameManager->getPlayer();
+
 	if (player != NULL)
 		drawPlayer(player);
 
