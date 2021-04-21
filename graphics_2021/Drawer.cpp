@@ -69,7 +69,7 @@ void drawCircle(float radius)
 void Drawer::drawPlanetary(Planetary* planetary)
 {
 	glLoadIdentity();
-
+	glEnable(GL_POLYGON_OFFSET_FILL);		//hidden line remove
 	//Ç×¼º
 	glColor3f(planetary->starColor.r, planetary->starColor.g, planetary->starColor.b);
 	glPushMatrix();
@@ -93,6 +93,8 @@ void Drawer::drawPlanetary(Planetary* planetary)
 	glPopMatrix();
 	glPopMatrix();
 	glPopMatrix();
+
+	glDisable(GL_POLYGON_OFFSET_FILL);
 }
 
 void Drawer::drawPlayer(Player* player)
