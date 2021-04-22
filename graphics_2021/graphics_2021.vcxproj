@@ -150,6 +150,7 @@
   <ItemGroup>
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Drawer.cpp" />
+    <ClCompile Include="Drawer3D.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="graphics_1.cpp" />
@@ -157,17 +158,20 @@
     <ClCompile Include="Planetary.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="random.cpp" />
+    <ClCompile Include="Viewer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="default.h" />
     <ClInclude Include="Drawer.h" />
+    <ClInclude Include="Drawer3D.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="Plane.h" />
     <ClInclude Include="Planetary.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="random.h" />
+    <ClInclude Include="Viewer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

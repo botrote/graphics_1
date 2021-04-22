@@ -101,6 +101,12 @@ void GameManager::onSpecialInput(int key)
 		break;
 	}
 	glutPostRedisplay();
+
+	float playerX = player->getPos().x;
+	float playerZ = -player->getPos().y;
+	glLoadIdentity();
+	gluLookAt(playerX, 1.75, playerZ, playerX + 0, 1.75 + 0, playerZ + (-1), 0.0f, 1.0f, 0.0f);
+
 }
 
 void GameManager::onPlayerHit(Type type)
