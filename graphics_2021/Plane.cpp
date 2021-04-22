@@ -5,7 +5,7 @@
 #include "Drawer.h"
 #include <iostream>
 
-Plane::Plane() : speed(0.05)
+Plane::Plane() : speed(0.075)
 {
 	setColor(Drawer::getRandomColor());
 	wingAngle = 0;
@@ -24,26 +24,26 @@ void Plane::move(Direction dir)
 	if (dir == Direction::DOWN)
 	{
 		position.y -= speed;
-		if (position.y < -0.9)
-			position.y = -0.9;
+		if (position.y < -7.0)
+			position.y = -7.0;
 	}
 	else if (dir == Direction::UP)
 	{
 		position.y += speed;
-		if (position.y > 0.9)
-			position.y = 0.9;
+		if (position.y > 7.0)
+			position.y = 7.0;
 	}
 	else if (dir == Direction::LEFT)
 	{
 		position.x -= speed;
-		if (position.x < -0.9)
-			position.x = -0.9;
+		if (position.x < -5.0)
+			position.x = -5.0;
 	}
 	else if (dir == Direction::RIGHT)
 	{
 		position.x += speed;
-		if (position.x > 0.9)
-			position.x = 0.9;
+		if (position.x > 5.0)
+			position.x = 5.0;
 	}
 }
 

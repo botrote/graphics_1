@@ -10,7 +10,7 @@ Player::Player()
 	health = 3;
 	setColor(Drawer::getRandomColor());
 	position.x = 0.0;
-	position.y = -0.7;
+	position.y = -6;
 	bullet_level = 1;
 }
 

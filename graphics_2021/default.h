@@ -8,6 +8,7 @@ struct Pos
 {
 	float x;
 	float y;
+	float z;
 };
 
 struct Color

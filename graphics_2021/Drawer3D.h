@@ -10,6 +10,6 @@ class Drawer3D
 public:
 	static void drawGame(GameManager* gameManager);
 	static void changeSize(int w, int h);
-	static void initScene();
+	static void updateViewing();
 };
 

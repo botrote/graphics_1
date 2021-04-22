@@ -18,6 +18,7 @@ public:
 	std::list<Planetary*> getPlanetaries();
 	bool isAllPass();
 	bool isAllFail();
+	bool isFirstViewing();
 	void onKeyInput(char key);
 	void onSpecialInput(int key);
 	void onPlayerHit(Type type);
@@ -36,5 +37,6 @@ private:
 	int level;
 	bool allPass;
 	bool allFail;
+	bool firstViewing;
 };
 

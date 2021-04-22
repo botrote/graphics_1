@@ -7,8 +7,8 @@ Enemy::Enemy(int level)
 {
 	team = Team::ENEMY;
 	health = level;
-	position.x = Random::getRandomFloat(-0.7, 0.7);
-	position.y = 0.7;
+	position.x = Random::getRandomFloat(-3, 3);
+	position.y = 6;
 }
 
 Enemy::~Enemy() 

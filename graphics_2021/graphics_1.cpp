@@ -26,8 +26,6 @@ int main(int argc, char** argv)
 
 	init(argc, argv);
 
-	Drawer3D::initScene();
-
 	//glutIdleFunc(stateUpdate);
 	glutTimerFunc(1, stateUpdate, 1);
 	glutDisplayFunc(drawerUpdate);

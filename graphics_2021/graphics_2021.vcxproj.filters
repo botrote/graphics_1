@@ -42,9 +42,6 @@
     <ClCompile Include="Planetary.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Viewer.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Drawer3D.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -75,9 +72,6 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Planetary.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Viewer.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Drawer3D.h">

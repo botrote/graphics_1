@@ -6,27 +6,21 @@
 #include <stdlib.h>
 #include <iostream>
 
-static float angle = 0.0, ratio;
-static float x = 0.0f, y = 1.75f, z = 5.0f;
-static float lx = 0.0f, ly = 0.0f, lz = -1.0f;
-static GLint snowman_display_list;
+void drawGrid();
 void drawPlayer();
+void drawEnemy();
+void drawBullets();
+void drawUI();
+void drawPlanetary();
 
 void Drawer3D::changeSize(int w, int h)
 {
-	GameManager* gameManager = GameManager::getInstance();
-
-	if (gameManager->getPlayer() == NULL)
-		return;
-
-	float playerX = gameManager->getPlayer()->getPos().x;
-	float playerZ = -gameManager->getPlayer()->getPos().y;
 	// Prevent a divide by zero, when window is too short
 	// (you cant make a window of zero width).
 	if (h == 0)
 		h = 1;
 
-	ratio = 1.0f * w / h;
+	float ratio = 1.0f * w / h;
 	// Reset the coordinate system before modifying
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -38,103 +32,36 @@ void Drawer3D::changeSize(int w, int h)
 	gluPerspective(45, ratio, 1, 1000);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(playerX, y, playerZ, playerX + lx, y + ly, playerZ - 1, 0.0f, 1.0f, 0.0f);
 
-
+	Drawer3D::updateViewing();
 }
-
-
-void drawSnowMan() {
-
-
-	glColor3f(1.0f, 1.0f, 1.0f);
-
-	// Draw Body	
-	glTranslatef(0.0f, 0.75f, 0.0f);
-	glutSolidSphere(0.75f, 20, 20);
-
-
-	// Draw Head
-	glTranslatef(0.0f, 1.0f, 0.0f);
-	glutSolidSphere(0.25f, 20, 20);
-
-	// Draw Eyes
-	glPushMatrix();
-	glColor3f(0.0f, 0.0f, 0.0f);
-	glTranslatef(0.05f, 0.10f, 0.18f);
-	glutSolidSphere(0.05f, 10, 10);
-	glTranslatef(-0.1f, 0.0f, 0.0f);
-	glutSolidSphere(0.05f, 10, 10);
-	glPopMatrix();
-
-	// Draw Nose
-	glColor3f(1.0f, 0.5f, 0.5f);
-	glRotatef(0.0f, 1.0f, 0.0f, 0.0f);
-	glutSolidCone(0.08f, 0.5f, 10, 2);
-}
-
-
-
-GLuint createDL() {
-	GLuint snowManDL;
-
-	// Create the id for the list
-	snowManDL = glGenLists(1);
-
-	// start list
-	glNewList(snowManDL, GL_COMPILE);
-
-	// call the function that contains the rendering commands
-	drawSnowMan();
-
-	// endList
-	glEndList();
-
-	return(snowManDL);
-}
-
-void Drawer3D::initScene() {
-
-	glEnable(GL_DEPTH_TEST);
-	snowman_display_list = createDL();
-
-}
-
-
-
-
 
 void Drawer3D::drawGame(GameManager* gameManager) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Draw ground
-
 	glColor3f(0.9f, 0.9f, 0.9f);
+	/*
 	glBegin(GL_QUADS);
 	glVertex3f(-100.0f, 0.0f, -100.0f);
 	glVertex3f(-100.0f, 0.0f, 100.0f);
 	glVertex3f(100.0f, 0.0f, 100.0f);
 	glVertex3f(100.0f, 0.0f, -100.0f);
 	glEnd();
+	*/
 
-	// Draw 36 SnowMen
-
-	for (int i = -3; i < 3; i++)
-		for (int j = -3; j < 3; j++) {
-			glPushMatrix();
-			glTranslatef(i * 10.0, 0, j * 10.0);
-			glCallList(snowman_display_list);;
-			glPopMatrix();
-		}
-
+	drawGrid();
+	drawBullets();
 	drawPlayer();
+	drawEnemy();
+	//drawUI();
+	drawPlanetary();
 	glutSwapBuffers();
 }
 
 void drawPlayer()
 {
 	GameManager* gameManager = GameManager::getInstance();
-
 	Player* player = gameManager->getPlayer();
 
 	if (player == NULL)
@@ -143,46 +70,220 @@ void drawPlayer()
 	float playerX = player->getPos().x;
 	float playerZ = -player->getPos().y;
 	Color playerColor = player->getColor();
-	glColor3f(1, 0, 0);
+
+	glColor3f(playerColor.r, playerColor.g, playerColor.b);
 	glPushMatrix();
-	glTranslatef(playerX, 1, playerZ -1);
-	glutWireCube(1);
+	glTranslatef(playerX, 1, playerZ);
+	glutWireCube(0.75);
+
+	glPushMatrix();
+	glTranslatef(0, 0, -1);
+	glScalef(1, 1, 2);
+	glutWireCube(0.4);
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(0.5, 0, 0.5);
+	glScalef(1, 1, 2.5);
+	glRotatef(-30, 0, 1, 0);
+	glutWireCube(0.4);
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(-0.5, 0, 0.5);
+	glScalef(1, 1, 2.5);
+	glRotatef(30, 0, 1, 0);
+	glutWireCube(0.4);
+	glPopMatrix();
+
+
 	glPopMatrix();
 
 }
 
-void orientMe(float ang) {
+void drawEnemy()
+{
+	GameManager* gameManager = GameManager::getInstance();
+	Enemy* enemy = gameManager->getEnemy();
 
+	if (enemy == NULL)
+		return;
 
-	lx = sin(ang);
-	lz = -cos(ang);
-	glLoadIdentity();
-	gluLookAt(x, y, z,
-		x + lx, y + ly, z + lz,
-		0.0f, 1.0f, 0.0f);
+	float enemyX = enemy->getPos().x;
+	float enemyZ = -enemy->getPos().y;
+	Color enemyColor = enemy->getColor();
+
+	glColor3f(enemyColor.r, enemyColor.g, enemyColor.b);
+	glPushMatrix();
+	glTranslatef(enemyX, 1, enemyZ);
+	glutWireCube(0.75);
+
+	glPushMatrix();
+	glTranslatef(0, 0, 1);
+	glScalef(1, 1, 2);
+	glutWireCube(0.4);
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(0.5, 0, -0.5);
+	glScalef(1, 1, 2.5);
+	glRotatef(30, 0, 1, 0);
+	glutWireCube(0.4);
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(-0.5, 0, -0.5);
+	glScalef(1, 1, 2.5);
+	glRotatef(-30, 0, 1, 0);
+	glutWireCube(0.4);
+	glPopMatrix();
+
+	glPopMatrix();
 }
 
-void moveMeFlat(int i) {
-	x = x + i * (lx) * 0.1;
-	z = z + i * (lz) * 0.1;
-	glLoadIdentity();
-	gluLookAt(x, y, z,
-		x + lx, y + ly, z + lz,
-		0.0f, 1.0f, 0.0f);
-}
+void drawBullets()
+{
+	std::list<Bullet*> bullets = GameManager::getInstance()->getBullets();
+	for (Bullet* b : bullets)
+	{
+		Pos bulletPos = b->getPos();
+		Color bulletColor = b->getColor();
+		glColor3f(bulletColor.r, bulletColor.g, bulletColor.b);
 
-void inputKey(int key, int x, int y) {
+		float bulletX = bulletPos.x;
+		float bulletZ = -bulletPos.y;
 
-	switch (key) {
-	case GLUT_KEY_LEFT: angle -= 0.01f; orientMe(angle); break;
-	case GLUT_KEY_RIGHT: angle += 0.01f; orientMe(angle); break;
-	case GLUT_KEY_UP: moveMeFlat(1); break;
-	case GLUT_KEY_DOWN: moveMeFlat(-1); break;
+		glPushMatrix();
+		glTranslatef(bulletX, 1, bulletZ);
+		if (b->getType() == Type::ITEM)
+		{
+			//glRotatef(45, 0, 0, 1);
+			//glRectf(-0.03, -0.03, 0.03, 0.03);
+			glutSolidCube(0.25);
+		}
+		else
+		{
+			glutSolidSphere(0.25, 20, 20);
+		}
+		glPopMatrix();
 	}
 }
 
-void processNormalKeys(unsigned char key, int x, int y) {
+void drawUI()
+{
+	GameManager* gameManager = GameManager::getInstance();
+	Player* player = gameManager->getPlayer();
+	Enemy* enemy = gameManager->getEnemy();
+	bool allPass = gameManager->isAllPass();
+	bool allFail = gameManager->isAllFail();
 
-	if (key == 27)
-		exit(0);
+	if (player != NULL)
+	{
+		if (allFail)
+		{
+			glColor3f(1, 1, 1);
+			glRectf(-0.9, -0.9, -0.85, -0.85);
+		}
+		else
+		{
+			glColor3f(1, 0, 0);
+			for (int i = 0; i < player->getHealth(); i++)
+			{
+				glRectf(-0.9 + i * (0.1), -0.9, -0.85 + i * (0.1), -0.85);
+			}
+		}
+	}
+
+	if (enemy != NULL)
+	{
+		if (allPass)
+		{
+			glColor3f(1, 1, 1);
+			glRectf(-0.9, +0.9, -0.85, +0.85);
+			return;
+		}
+		else
+		{
+			glColor3f(1, 0, 0);
+			for (int i = 0; i < enemy->getHealth(); i++)
+			{
+				glRectf(-0.9 + i * (0.1), 0.9, -0.85 + i * (0.1), 0.85);
+			}
+		}
+	}
+}
+
+void drawGrid()
+{
+
+	glColor3f(0.9, 0.9, 0.9);
+
+	glBegin(GL_QUADS);
+	glVertex3f(-5.5f, -0.5f, -7.3f);      //plane 크기에 따라 면적 조정할 것.
+	glVertex3f(-5.5f, -0.5f, 7.3f);
+	glVertex3f(5.5f, -0.5f, 7.3f);
+	glVertex3f(5.5f, -0.5f, -7.3f);
+	glEnd();
+
+	float i;
+	glColor3f(0, 0, 0.4);
+
+	glBegin(GL_LINES);
+	for (i = -15; i < 15; i += 0.5) {
+		glVertex3f(i, -0.49f, -15.0f);
+		glVertex3f(i, -0.49f, 15.0f);
+		glVertex3f(-15.0f, -0.49f, i - 5.0f);
+		glVertex3f(15.0f, -0.49f, i - 5.0f);
+	}
+	glEnd();
+
+}
+
+void drawPlanetary()
+{
+	GameManager* gameManager = GameManager::getInstance();
+	for (Planetary* planetary : gameManager->getPlanetaries())
+	{
+		glColor3f(planetary->starColor.r, planetary->starColor.g, planetary->starColor.b);
+		glPushMatrix();
+		glTranslatef(planetary->starPosition.x, 0, -planetary->starPosition.y);
+		glRotatef(planetary->starAngle, 0, 1, 0);
+		glutWireSphere(planetary->starRadius, 20, 20);
+
+		glColor3f(planetary->planetColor.r, planetary->planetColor.g, planetary->planetColor.b);
+		glPushMatrix();
+		glRotatef(planetary->planetAngle, 0, 1, 0);
+		glTranslatef(planetary->planetRevoRadius, 0, 0);
+		glutWireSphere(planetary->planetRadius, 20, 20);
+
+		glColor3f(planetary->satelliteColor.r, planetary->satelliteColor.g, planetary->satelliteColor.b);
+		glPushMatrix();
+		glRotatef(planetary->satelliteAngle, 0, 1, 0);
+		glTranslatef(0, 0, planetary->satelliteRevoRadius);
+		glutWireSphere(planetary->satelliteRadius, 20, 20);
+
+		glPopMatrix();
+		glPopMatrix();
+		glPopMatrix();
+
+
+	}
+}
+
+void Drawer3D::updateViewing()
+{
+	GameManager* gameManager = GameManager::getInstance();
+
+	if (gameManager->getPlayer() == NULL)
+		return;
+
+	float playerX = gameManager->getPlayer()->getPos().x;
+	float playerZ = -gameManager->getPlayer()->getPos().y;
+	glLoadIdentity();
+
+	bool isFirst = gameManager->isFirstViewing();
+	if(isFirst)
+		gluLookAt(playerX, 1.25, playerZ - 0.4, playerX, 1.25, playerZ - 1.4, 0.0f, 1.0f, 0.0f);
+	else
+		gluLookAt(playerX, 1.75, playerZ + 2, playerX, 1.75, playerZ + 1, 0.0f, 1.0f, 0.0f);
 }

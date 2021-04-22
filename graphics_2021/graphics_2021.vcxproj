@@ -158,7 +158,6 @@
     <ClCompile Include="Planetary.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="random.cpp" />
-    <ClCompile Include="Viewer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bullet.h" />
@@ -171,7 +170,6 @@
     <ClInclude Include="Planetary.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="random.h" />
-    <ClInclude Include="Viewer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

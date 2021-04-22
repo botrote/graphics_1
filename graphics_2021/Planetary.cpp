@@ -17,6 +17,7 @@ Planetary::Planetary(Pos starPos, float starRad, float planetRad, float satellit
 	planetRevoRadius = 3.5 * starRadius;
 	satelliteRevoRadius = 2.5 * planetRadius;
 
+	starAngle = Random::getRandomFloat(0, 360);
 	planetAngle = Random::getRandomFloat(0, 360);
 	satelliteAngle = Random::getRandomFloat(0, 360);
 
@@ -24,6 +25,7 @@ Planetary::Planetary(Pos starPos, float starRad, float planetRad, float satellit
 
 void Planetary::update()
 {
-	planetAngle += starRadius;
-	satelliteAngle += planetRadius * 2;
+	starAngle += 0.05;
+	planetAngle += starRadius / 12;
+	satelliteAngle += planetRadius / 6;
 }

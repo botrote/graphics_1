@@ -4,6 +4,7 @@
 #include <GL/glut.h>
 #include <iostream>
 #include "random.h"
+#include "Drawer3D.h"
 
 GameManager* GameManager::instance = NULL;
 int bulletRefreshTimer = 0;
@@ -22,14 +23,15 @@ GameManager::GameManager()
 	enemy = new Enemy(level);
 	allPass = false;
 	allFail = false;
+	firstViewing = false;
 	srand(time(0));
 
-	Pos plaPos1 = { Random::getRandomFloat(0, 0.5), Random::getRandomFloat(0, 0.5) };
-	Planetary* planetary1 = new Planetary(plaPos1, 0.10, 0.05, 0.015);
+	Pos plaPos1 = { Random::getRandomFloat(3, 7), Random::getRandomFloat(4, 9) };
+	Planetary* planetary1 = new Planetary(plaPos1, 1, 0.5, 0.25);
 	planetaries.push_back(planetary1);
 
-	Pos plaPos2 = { Random::getRandomFloat(-0.5, 0), Random::getRandomFloat(-0.5, 0) };
-	Planetary* planetary2 = new Planetary(plaPos2, 0.075, 0.03, 0.01);
+	Pos plaPos2 = { Random::getRandomFloat(-7, -3), Random::getRandomFloat(4, 9) };
+	Planetary* planetary2 = new Planetary(plaPos2, 0.8, 0.4, 0.2);
 	planetaries.push_back(planetary2);
 
 	/*
@@ -66,7 +68,7 @@ void GameManager::onKeyInput(char key)
 			}
 		}
 		if (bulletRefreshTimer < 0)
-			bulletRefreshTimer = 2000;
+			bulletRefreshTimer = 2500;
 		break;
 		}
 	case 'c':
@@ -74,6 +76,10 @@ void GameManager::onKeyInput(char key)
 		break;
 	case 'f':
 		allFail = !allFail;
+		break;
+	case 'v':
+		firstViewing = !firstViewing;
+		Drawer3D::updateViewing();
 		break;
 	}
 	
@@ -102,10 +108,7 @@ void GameManager::onSpecialInput(int key)
 	}
 	glutPostRedisplay();
 
-	float playerX = player->getPos().x;
-	float playerZ = -player->getPos().y;
-	glLoadIdentity();
-	gluLookAt(playerX, 1.75, playerZ, playerX + 0, 1.75 + 0, playerZ + (-1), 0.0f, 1.0f, 0.0f);
+	Drawer3D::updateViewing();
 
 }
 
@@ -214,7 +217,7 @@ void GameManager::updateState()
 	}
 	bullets.remove_if(bulletExpired);	//화면에서 지울 bullet 검사.
 	
-	if (enemyShootTimer > 1500 - 150 * level)		//레벨마다 enemy의 공격속도가 다름
+	if (enemyShootTimer > 3000 - 200 * level)		//레벨마다 enemy의 공격속도가 다름
 	{
 		enemyShootTimer = 0;
 		if (enemy != NULL)
@@ -226,7 +229,7 @@ void GameManager::updateState()
 		}
 	}
 
-	if (enemyMoveTimer > 700 - 100 * level)		//레벨마다 enemy의 이동속도가 다름
+	if (enemyMoveTimer > 450 - 30 * level)		//레벨마다 enemy의 이동속도가 다름
 	{
 		enemyMoveTimer = 0;
 		if(enemy != NULL)
@@ -273,6 +276,11 @@ bool GameManager::isAllPass()
 bool GameManager::isAllFail()
 {
 	return allFail;
+}
+
+bool GameManager::isFirstViewing()
+{
+	return firstViewing;
 }
 
 std::list<Planetary*> GameManager::getPlanetaries()

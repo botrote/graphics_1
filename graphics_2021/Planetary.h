@@ -15,6 +15,7 @@ public:
 	float satelliteRadius;
 	float planetRevoRadius;
 	float satelliteRevoRadius;
+	float starAngle;
 	float planetAngle;
 	float satelliteAngle;
 };
