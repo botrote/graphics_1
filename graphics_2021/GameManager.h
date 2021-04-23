@@ -19,6 +19,7 @@ public:
 	bool isAllPass();
 	bool isAllFail();
 	bool isFirstViewing();
+	bool isHiddenRenderingMode();
 	void onKeyInput(char key);
 	void onSpecialInput(int key);
 	void onPlayerHit(Type type);
@@ -38,5 +39,6 @@ private:
 	bool allPass;
 	bool allFail;
 	bool firstViewing;
+	bool hidden_rendering_mode;
 };
 

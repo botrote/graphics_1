@@ -24,6 +24,7 @@ GameManager::GameManager()
 	allPass = false;
 	allFail = false;
 	firstViewing = false;
+	hidden_rendering_mode = false;
 	srand(time(0));
 
 	Pos plaPos1 = { Random::getRandomFloat(3, 7), Random::getRandomFloat(4, 9) };
@@ -80,6 +81,9 @@ void GameManager::onKeyInput(char key)
 	case 'v':
 		firstViewing = !firstViewing;
 		Drawer3D::updateViewing();
+		break;
+	case 'r':
+		hidden_rendering_mode = !hidden_rendering_mode;
 		break;
 	}
 	
@@ -281,6 +285,11 @@ bool GameManager::isAllFail()
 bool GameManager::isFirstViewing()
 {
 	return firstViewing;
+}
+
+bool GameManager::isHiddenRenderingMode()
+{
+	return hidden_rendering_mode;
 }
 
 std::list<Planetary*> GameManager::getPlanetaries()
