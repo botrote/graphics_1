@@ -4,7 +4,6 @@
 #include <GL/glut.h>
 #include <iostream>
 #include "random.h"
-#include "Drawer3D.h"
 
 GameManager* GameManager::instance = NULL;
 int bulletRefreshTimer = 0;
@@ -80,7 +79,6 @@ void GameManager::onKeyInput(char key)
 		break;
 	case 'v':
 		firstViewing = !firstViewing;
-		Drawer3D::updateViewing();
 		break;
 	case 'r':
 		hidden_rendering_mode = !hidden_rendering_mode;
@@ -111,9 +109,6 @@ void GameManager::onSpecialInput(int key)
 		break;
 	}
 	glutPostRedisplay();
-
-	Drawer3D::updateViewing();
-
 }
 
 void GameManager::onPlayerHit(Type type)

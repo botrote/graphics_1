@@ -36,7 +36,7 @@ int main(int argc, char** argv)
 	glutDisplayFunc(drawerUpdate);
 	glutKeyboardFunc(onkeyInput);
 	glutSpecialFunc(onSpecialInput);
-	//glutReshapeFunc(changeSize);
+	glutReshapeFunc(changeSize);
 	glutMainLoop();
 
 	return 0;
@@ -90,5 +90,5 @@ void onSpecialInput(int key, int x, int y)
 
 void changeSize(int w, int h)
 {
-	Drawer3D::changeSize(w, h);
+	shaderDrawer->changeSize(w, h);
 }

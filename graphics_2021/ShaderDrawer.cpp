@@ -111,9 +111,13 @@ GLuint LoadShaders(const char* vertex_file_path, const char* fragment_file_path)
 
 	return ProgramID;
 }
-void drawSquare(GLuint MatrixID, const GLfloat vertexbufferdata[], const GLfloat colorbufferdata[], glm::mat4 MVP);
+void drawCube(GLuint MatrixID, const GLfloat colorbufferdata[], glm::mat4 MVP, bool isFill);
+void drawSquare(GLuint MatrixID, const GLfloat colorbufferdata[], glm::mat4 MVP, bool isFill);
+void drawLine(GLuint MatrixID, const GLfloat colorbufferdata[], glm::mat4 MVP);
+void drawSphere(GLuint MatrixID, const GLfloat colorbufferdata[], glm::mat4 MVP, bool isFill);
 
-static const GLfloat g_vertex_buffer_data_cube[] = {
+static const GLfloat verteces_cube[] = {
+	/*
 	-1.0f,-1.0f,-1.0f,
 	-1.0f,-1.0f, 1.0f,
 	-1.0f, 1.0f, 1.0f,
@@ -150,95 +154,51 @@ static const GLfloat g_vertex_buffer_data_cube[] = {
 	 1.0f, 1.0f, 1.0f,
 	-1.0f, 1.0f, 1.0f,
 	 1.0f,-1.0f, 1.0f
-};
-
-static const GLfloat g_vertex_buffer_data_wireCube[] = {
-	-1.0, -1.0, -1.0,
-	-1.0, -1.0, 1.0,
-
-	-1.0, -1.0, -1.0,
+	 */
+	-1.0, -1.0, -1.0, 
 	1.0, -1.0, -1.0,
-
-	-1.0, -1.0, -1.0,
-	-1.0, 1.0, -1.0,
-
-	1.0, -1.0, 1.0,
-	1.0, -1.0, -1.0,
-
 	1.0, -1.0, 1.0,
 	-1.0, -1.0, 1.0,
 
+	-1.0, 1.0, -1.0,
+	1.0, 1.0, -1.0,
+	1.0, 1.0, 1.0,
+	-1.0, 1.0, 1.0,
+
+	-1.0, -1.0, -1.0,
+	-1.0, -1.0, 1.0,
+	-1.0, 1.0, 1.0,
+	-1.0, 1.0, -1.0,
+
+	1.0, -1.0, -1.0,
 	1.0, -1.0, 1.0,
 	1.0, 1.0, 1.0,
-
 	1.0, 1.0, -1.0,
+
+	-1.0, -1.0, -1.0,
 	1.0, -1.0, -1.0,
-
-	1.0, 1.0, -1.0,
-	1.0, 1.0, 1.0,
-
 	1.0, 1.0, -1.0,
 	-1.0, 1.0, -1.0,
 
-	-1.0, 1.0, 1.0,
-	1.0, 1.0, 1.0,
-
-	-1.0, 1.0, 1.0,
 	-1.0, -1.0, 1.0,
-
-	-1.0, 1.0, 1.0,
-	-1.0, 1.0, -1.0,
+	1.0, -1.0, 1.0,
+	1.0, 1.0, 1.0,
+	-1.0, 1.0, 1.0
 };
 
-static const GLfloat g_vertex_buffer_data_innerPlane[] = {
-
-	-5.5f, -0.5f, -7.3f,      //plane 크기에 따라 면적 조정할 것.
-	-5.5f, -0.5f, 7.3f,
-	5.5f, -0.5f, 7.3f,
-	5.5f, -0.5f, -7.3f
-
+static const GLfloat verteces_square[] = {
+	-1.0f, 0.0f, -1.0f,
+	-1.0f, 0.0f, 1.0f,
+	1.0f, 0.0f, 1.0f,
+	1.0f, 0.0f, -1.0f
 };
 
-static const GLfloat g_color_buffer_data_cube[] = {
-	0.583f,  0.771f,  0.014f,
-	0.609f,  0.115f,  0.436f,
-	0.327f,  0.483f,  0.844f,
-	0.822f,  0.569f,  0.201f,
-	0.435f,  0.602f,  0.223f,
-	0.310f,  0.747f,  0.185f,
-	0.597f,  0.770f,  0.761f,
-	0.559f,  0.436f,  0.730f,
-	0.359f,  0.583f,  0.152f,
-	0.483f,  0.596f,  0.789f,
-	0.559f,  0.861f,  0.639f,
-	0.195f,  0.548f,  0.859f,
-	0.014f,  0.184f,  0.576f,
-	0.771f,  0.328f,  0.970f,
-	0.406f,  0.615f,  0.116f,
-	0.676f,  0.977f,  0.133f,
-	0.971f,  0.572f,  0.833f,
-	0.140f,  0.616f,  0.489f,
-	0.997f,  0.513f,  0.064f,
-	0.945f,  0.719f,  0.592f,
-	0.543f,  0.021f,  0.978f,
-	0.279f,  0.317f,  0.505f,
-	0.167f,  0.620f,  0.077f,
-	0.347f,  0.857f,  0.137f,
-	0.055f,  0.953f,  0.042f,
-	0.714f,  0.505f,  0.345f,
-	0.783f,  0.290f,  0.734f,
-	0.722f,  0.645f,  0.174f,
-	0.302f,  0.455f,  0.848f,
-	0.225f,  0.587f,  0.040f,
-	0.517f,  0.713f,  0.338f,
-	0.053f,  0.959f,  0.120f,
-	0.393f,  0.621f,  0.362f,
-	0.673f,  0.211f,  0.457f,
-	0.820f,  0.883f,  0.371f,
-	0.982f,  0.099f,  0.879f
+static const GLfloat verteces_line[] = {
+	-1.0f, 0.0f, 0.0f,
+	1.0f, 0.0f, 0.0f,
 };
 
-static const GLfloat g_color_buffer_data_cube2[] = {
+static const GLfloat color_red[] = {
 	1.0f,  0.0f,  0.0f,
 	1.0f,  0.0f,  0.0f,
 	1.0f,  0.0f,  0.0f,
@@ -277,6 +237,134 @@ static const GLfloat g_color_buffer_data_cube2[] = {
 	1.0f,  0.0f,  0.0f
 };
 
+static const GLfloat color_green[] = {
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f,
+	0.0f,  1.0f,  0.0f
+};
+
+static const GLfloat color_blue[] = {
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f,
+	0.0f,  0.0f,  1.0f
+};
+
+static const GLfloat color_white[] = {
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f,
+	1.0f,  1.0f,  1.0f
+};
+
+void ShaderDrawer::changeSize(int w, int h)
+{
+	// Prevent a divide by zero, when window is too short
+	// (you cant make a window of zero width).
+	if (h == 0)
+		h = 1;
+	glViewport(0, 0, w, h);
+	Projection = glm::perspective(glm::radians(45.0f), 1.0f * w / h, 0.1f, 100.0f);
+	updateViewing();
+}
+
 ShaderDrawer::ShaderDrawer()
 {
 	programID = LoadShaders("TransformVertexShader.vertexshader", "ColorFragmentShader.fragmentshader");
@@ -286,13 +374,25 @@ ShaderDrawer::ShaderDrawer()
 
 	Projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
 	// Camera matrix
-	glm::mat4 View = glm::lookAt(
-		glm::vec3(4, 3, -3), // Camera is at (4,3,-3), in World Space
-		glm::vec3(0, 0, 0), // and looks at the origin
-		glm::vec3(0, 1, 0)  // Head is up (set to 0,-1,0 to look upside-down)
-	);
+	glm::mat4 View = glm::mat4(1.0f);
 	Model = glm::mat4(1.0f);
 	MVP = Projection * View * Model;
+}
+
+void ShaderDrawer::updateViewing()
+{
+	Player* player = GameManager::getInstance()->getPlayer();
+	if (player == NULL)
+		return;
+
+	float playerX = player->getPos().x;
+	float playerZ = -player->getPos().y;
+
+	bool isFirst = GameManager::getInstance()->isFirstViewing();
+	if (isFirst)
+		View = glm::lookAt(glm::vec3(playerX, 1.25, playerZ - 0.4f), glm::vec3(playerX, 1.25, playerZ - 1.4f), glm::vec3(0.0f, 1.0f, 0.0f));
+	else
+		View = glm::lookAt(glm::vec3(playerX, 1.75, playerZ + 2), glm::vec3(playerX, 1.75, playerZ + 1), glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
 void ShaderDrawer::drawGame(GameManager* gameManager)
@@ -300,27 +400,16 @@ void ShaderDrawer::drawGame(GameManager* gameManager)
 	// Clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	Player* player = gameManager->getPlayer();
-	float playerX = gameManager->getPlayer()->getPos().x;
-	float playerZ = -gameManager->getPlayer()->getPos().y;
-
-	Enemy* enemy = gameManager->getEnemy();
-	float enemyX = enemy->getPos().x;
-	float enemyZ = -enemy->getPos().y;
-
 	// Use our shader
 	glUseProgram(programID);
 
-	View = glm::lookAt(
-		glm::vec3(playerX, 1.75, playerZ + 2), // Camera is at (4,3,-3), in World Space
-		glm::vec3(playerX, 1.75, playerZ + 1), // and looks at the origin
-		glm::vec3(0.0f, 1.0f, 0.0f)  // Head is up (set to 0,-1,0 to look upside-down)
-	);
+	updateViewing();
 
 	drawEnemy();
 	drawPlayer();
-
-	// Swap buffers
+	drawGrid();
+	drawBullets();
+	drawPlanetaries();
 	glutSwapBuffers();
 }
 
@@ -344,24 +433,24 @@ void ShaderDrawer::drawEnemy()
 	Model = glm::scale(Model, glm::vec3(0.35f, 0.35f, 0.35f));
 	glm::mat4 bodyModel = Model;
 	MVP = Projection * View * Model;
-	drawSquare(MatrixID, g_vertex_buffer_data_cube, g_color_buffer_data_cube2, MVP); //몸통
+	drawCube(MatrixID, color_red, MVP, false); //몸통
 
 	Model = glm::translate(Model, glm::vec3(0.0f, 0.0f, 1.0f));
 	Model = glm::scale(Model, glm::vec3(0.3f, 0.3f, 0.5f));
 	MVP = Projection * View * Model;
-	drawSquare(MatrixID, g_vertex_buffer_data_cube, g_color_buffer_data_cube2, MVP); //머리
+	drawCube(MatrixID, color_red, MVP, false); //머리
 
 	Model = glm::translate(bodyModel, glm::vec3(0.9f, 0.0f, -0.9f));
 	Model = glm::rotate(Model, -45.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	Model = glm::scale(Model, glm::vec3(0.4f, 0.4f, 0.8f));
 	MVP = Projection * View * Model;
-	drawSquare(MatrixID, g_vertex_buffer_data_cube, g_color_buffer_data_cube2, MVP); //오른날개
+	drawCube(MatrixID, color_red, MVP, false); //오른날개
 
 	Model = glm::translate(bodyModel, glm::vec3(-0.9f, 0.0f, -0.9f));
 	Model = glm::rotate(Model, 45.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	Model = glm::scale(Model, glm::vec3(0.4f, 0.4f, 0.8f));
 	MVP = Projection * View * Model;
-	drawSquare(MatrixID, g_vertex_buffer_data_cube, g_color_buffer_data_cube2, MVP); //왼날개
+	drawCube(MatrixID, color_red, MVP, false); //왼날개
 }
 
 void ShaderDrawer::drawPlayer()
@@ -380,41 +469,156 @@ void ShaderDrawer::drawPlayer()
 	MVP = Projection * View * Model;
 
 	Model = glm::translate(glm::mat4(1.0f), glm::vec3(playerX, 1.0f, playerZ));
-	Model = glm::rotate(Model, 0.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 	Model = glm::scale(Model, glm::vec3(0.35f, 0.35f, 0.35f));
 	glm::mat4 bodyModel = Model;
 	MVP = Projection * View * Model;
-	drawSquare(MatrixID, g_vertex_buffer_data_cube, g_color_buffer_data_cube2, MVP); //몸통
+	drawCube(MatrixID, color_green, MVP, false); //몸통
 
 	Model = glm::translate(Model, glm::vec3(0.0f, 0.0f, -1.0f));
 	Model = glm::scale(Model, glm::vec3(0.3f, 0.3f, 0.5f));
 	MVP = Projection * View * Model;
-	drawSquare(MatrixID, g_vertex_buffer_data_cube, g_color_buffer_data_cube2, MVP); //머리
+	drawCube(MatrixID, color_green, MVP, false); //머리
 
 	Model = glm::translate(bodyModel, glm::vec3(0.9f, 0.0f, 0.9f));
 	Model = glm::rotate(Model, 45.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	Model = glm::scale(Model, glm::vec3(0.4f, 0.4f, 0.8f));
 	MVP = Projection * View * Model;
-	drawSquare(MatrixID, g_vertex_buffer_data_cube, g_color_buffer_data_cube2, MVP); //오른날개
+	drawCube(MatrixID, color_green, MVP, false); //오른날개
 
 	Model = glm::translate(bodyModel, glm::vec3(-0.9f, 0.0f, 0.9f));
 	Model = glm::rotate(Model, -45.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	Model = glm::scale(Model, glm::vec3(0.4f, 0.4f, 0.8f));
 	MVP = Projection * View * Model;
-	drawSquare(MatrixID, g_vertex_buffer_data_cube, g_color_buffer_data_cube2, MVP); //왼날개
+	drawCube(MatrixID, color_green, MVP, false); //왼날개
 }
 
-void drawSquare(GLuint MatrixID, const GLfloat vertexbufferdata[], const GLfloat colorbufferdata[], glm::mat4 MVP)
+void ShaderDrawer::drawBullets()
 {
+	std::list<Bullet*> bullets = GameManager::getInstance()->getBullets();
+	for (Bullet* b : bullets)
+	{
+		Pos bulletPos = b->getPos();
+		Color bulletColor = b->getColor();
+
+		float bulletX = bulletPos.x;
+		float bulletZ = -bulletPos.y;
+
+		Model = glm::mat4(1.0f);
+		Model = glm::translate(Model, glm::vec3(bulletX, 1.0f, bulletZ));
+		Model = glm::scale(Model, glm::vec3(0.1f, 0.1f, 0.1f));
+
+		if (b->getType() == Type::ITEM)
+		{
+			Model = glm::rotate(Model, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			Model = glm::rotate(Model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			MVP = Projection * View * Model;
+			drawSphere(MatrixID, color_green, MVP, true);
+		}
+		else
+		{
+			MVP = Projection * View * Model;
+			drawSphere(MatrixID, color_red, MVP, true);
+		}
+	}
+}
+
+void ShaderDrawer::drawGrid()
+{
+	Model = glm::mat4(1.0f);
+	Model = glm::translate(Model, glm::vec3(0.0f, -0.5f, 0.0f));
+	Model = glm::scale(Model, glm::vec3(6.0f, 1.0f, 11.0f));
+	MVP = Projection * View * Model;
+	drawSquare(MatrixID, color_white, MVP, true);
+
+	Model = glm::mat4(1.0f);
+	
+	Model = glm::translate(Model, glm::vec3(0.0f, -0.49f, 0.0f));
+	MVP = Projection * View * Model;
+
+	for (int i = 0; i < 40; i++)
+	{
+		Model = glm::mat4(1.0f);
+		Model = glm::translate(Model, glm::vec3(0.0f, -0.49f, -20.0f + i));
+		Model = glm::scale(Model, glm::vec3(20.0f, 1.0f, 1.0f));
+		MVP = Projection * View * Model;
+		drawLine(MatrixID, color_blue, MVP);
+
+		Model = glm::mat4(1.0f);
+		Model = glm::translate(Model, glm::vec3(-20.0f + i, -0.49f, 0.0f));
+		Model = glm::rotate(Model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		
+		Model = glm::scale(Model, glm::vec3(20.0f, 1.0f, 1.0f));
+		MVP = Projection * View * Model;
+		drawLine(MatrixID, color_blue, MVP);
+	}
+
+}
+
+void ShaderDrawer::drawPlanetaries()
+{
+	for (Planetary* planetary : GameManager::getInstance()->getPlanetaries())
+	{
+		Model = glm::mat4(1.0f);
+		Model = glm::translate(Model, glm::vec3(planetary->starPosition.x, 0.5f, -planetary->starPosition.y));
+		Model = glm::rotate(Model, glm::radians(planetary->starAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+		Model = glm::scale(Model, glm::vec3(planetary->starRadius));
+		MVP = Projection * View * Model;
+		drawSphere(MatrixID, color_blue, MVP, false);
+
+		Model = glm::rotate(Model, glm::radians(planetary->planetAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+		Model = glm::translate(Model, glm::vec3(planetary->planetRevoRadius, 0.0f, 0.0f));
+		Model = glm::scale(Model, glm::vec3(planetary->planetRadius));
+		MVP = Projection * View * Model;
+		drawSphere(MatrixID, color_green, MVP, false);
+
+		Model = glm::rotate(Model, glm::radians(planetary->satelliteAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+		Model = glm::translate(Model, glm::vec3(0.0f, 0.0f, planetary->satelliteRevoRadius));
+		Model = glm::scale(Model, glm::vec3(planetary->satelliteRadius));
+		MVP = Projection * View * Model;
+		drawSphere(MatrixID, color_red, MVP, true);
+		/*
+		glColor3f(planetary->satelliteColor.r, planetary->satelliteColor.g, planetary->satelliteColor.b);
+		glPushMatrix();
+		glRotatef(planetary->satelliteAngle, 0, 1, 0);
+		glTranslatef(0, 0, planetary->satelliteRevoRadius);
+		glutWireSphere(planetary->satelliteRadius, 20, 20);
+		if (hidden_rendering_mode) {
+			drawHiddenSphere(planetary->satelliteRadius);
+		}
+		else
+		{
+			glutWireSphere(planetary->satelliteRadius, 20, 20);
+		}
+
+		glPopMatrix();
+		glPopMatrix();
+		glPopMatrix();
+
+		*/
+	}
+}
+
+void drawSphere(GLuint MatrixID, const GLfloat colorbufferdata[], glm::mat4 MVP, bool isFill)
+{
+	drawCube(MatrixID, colorbufferdata, MVP, isFill);
+}
+
+void drawCube(GLuint MatrixID, const GLfloat colorbufferdata[], glm::mat4 MVP, bool isFill)
+{
+	if (isFill)
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	else
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
 	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, 432, vertexbufferdata, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_cube), verteces_cube, GL_STATIC_DRAW);
 
 	GLuint colorbuffer;
 	glGenBuffers(1, &colorbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-	glBufferData(GL_ARRAY_BUFFER, 432, colorbufferdata, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_cube), colorbufferdata, GL_STATIC_DRAW);
 
 	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
@@ -443,8 +647,107 @@ void drawSquare(GLuint MatrixID, const GLfloat vertexbufferdata[], const GLfloat
 	);
 
 	// Draw the triangle !
-	glDrawArrays(GL_TRIANGLES, 0, 12 * 3); // 12*3 indices starting at 0 -> 12 triangles
+	glDrawArrays(GL_QUADS, 0, 4 * 6); // 12*3 indices starting at 0 -> 12 triangles
 	//glDrawArrays(GL_LINES, 0, 12 * 2);
+
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+
+	glDeleteBuffers(1, &vertexbuffer);
+	glDeleteBuffers(1, &colorbuffer);
+}
+
+void drawSquare(GLuint MatrixID, const GLfloat colorbufferdata[], glm::mat4 MVP, bool isFill)
+{
+	if (isFill)
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	else
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	GLuint vertexbuffer;
+	glGenBuffers(1, &vertexbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_square), verteces_square, GL_STATIC_DRAW);
+
+	GLuint colorbuffer;
+	glGenBuffers(1, &colorbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_square), colorbufferdata, GL_STATIC_DRAW);
+
+	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+	// 1rst attribute buffer : vertices
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glVertexAttribPointer(
+		0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+	);
+
+	// 2nd attribute buffer : colors
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+	glVertexAttribPointer(
+		1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
+		3,                                // size
+		GL_FLOAT,                         // type
+		GL_FALSE,                         // normalized?
+		0,                                // stride
+		(void*)0                          // array buffer offset
+	);
+
+	glDrawArrays(GL_QUADS, 0, 4); // 12*3 indices starting at 0 -> 12 triangles
+
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+
+	glDeleteBuffers(1, &vertexbuffer);
+	glDeleteBuffers(1, &colorbuffer);
+}
+
+void drawLine(GLuint MatrixID, const GLfloat colorbufferdata[], glm::mat4 MVP)
+{
+	GLuint vertexbuffer;
+	glGenBuffers(1, &vertexbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_line), verteces_line, GL_STATIC_DRAW);
+
+	GLuint colorbuffer;
+	glGenBuffers(1, &colorbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_square), colorbufferdata, GL_STATIC_DRAW);
+
+	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+	// 1rst attribute buffer : vertices
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glVertexAttribPointer(
+		0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+	);
+
+	// 2nd attribute buffer : colors
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+	glVertexAttribPointer(
+		1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
+		3,                                // size
+		GL_FLOAT,                         // type
+		GL_FALSE,                         // normalized?
+		0,                                // stride
+		(void*)0                          // array buffer offset
+	);
+
+	glDrawArrays(GL_LINES, 0, 2); // 12*3 indices starting at 0 -> 12 triangles
 
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
