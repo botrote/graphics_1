@@ -158,6 +158,7 @@
     <ClCompile Include="Planetary.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="random.cpp" />
+    <ClCompile Include="ShaderDrawer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bullet.h" />
@@ -170,6 +171,11 @@
     <ClInclude Include="Planetary.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="random.h" />
+    <ClInclude Include="ShaderDrawer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ColorFragmentShader.fragmentshader" />
+    <None Include="TransformVertexShader.vertexshader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
