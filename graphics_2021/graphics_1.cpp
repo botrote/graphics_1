@@ -57,7 +57,7 @@ void init(int argc, char** argv)
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 
 	glMatrixMode(GL_PROJECTION);

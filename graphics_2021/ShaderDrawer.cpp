@@ -113,7 +113,7 @@ GLuint LoadShaders(const char* vertex_file_path, const char* fragment_file_path)
 }
 void drawSquare(GLuint MatrixID, const GLfloat vertexbufferdata[], const GLfloat colorbufferdata[], glm::mat4 MVP);
 
-static const GLfloat g_vertex_buffer_data[] = {
+static const GLfloat g_vertex_buffer_data_cube[] = {
 	-1.0f,-1.0f,-1.0f,
 	-1.0f,-1.0f, 1.0f,
 	-1.0f, 1.0f, 1.0f,
@@ -152,7 +152,54 @@ static const GLfloat g_vertex_buffer_data[] = {
 	 1.0f,-1.0f, 1.0f
 };
 
-static const GLfloat g_color_buffer_data[] = {
+static const GLfloat g_vertex_buffer_data_wireCube[] = {
+	-1.0, -1.0, -1.0,
+	-1.0, -1.0, 1.0,
+
+	-1.0, -1.0, -1.0,
+	1.0, -1.0, -1.0,
+
+	-1.0, -1.0, -1.0,
+	-1.0, 1.0, -1.0,
+
+	1.0, -1.0, 1.0,
+	1.0, -1.0, -1.0,
+
+	1.0, -1.0, 1.0,
+	-1.0, -1.0, 1.0,
+
+	1.0, -1.0, 1.0,
+	1.0, 1.0, 1.0,
+
+	1.0, 1.0, -1.0,
+	1.0, -1.0, -1.0,
+
+	1.0, 1.0, -1.0,
+	1.0, 1.0, 1.0,
+
+	1.0, 1.0, -1.0,
+	-1.0, 1.0, -1.0,
+
+	-1.0, 1.0, 1.0,
+	1.0, 1.0, 1.0,
+
+	-1.0, 1.0, 1.0,
+	-1.0, -1.0, 1.0,
+
+	-1.0, 1.0, 1.0,
+	-1.0, 1.0, -1.0,
+};
+
+static const GLfloat g_vertex_buffer_data_innerPlane[] = {
+
+	-5.5f, -0.5f, -7.3f,      //plane 크기에 따라 면적 조정할 것.
+	-5.5f, -0.5f, 7.3f,
+	5.5f, -0.5f, 7.3f,
+	5.5f, -0.5f, -7.3f
+
+};
+
+static const GLfloat g_color_buffer_data_cube[] = {
 	0.583f,  0.771f,  0.014f,
 	0.609f,  0.115f,  0.436f,
 	0.327f,  0.483f,  0.844f,
@@ -191,7 +238,7 @@ static const GLfloat g_color_buffer_data[] = {
 	0.982f,  0.099f,  0.879f
 };
 
-static const GLfloat g_color_buffer_data2[] = {
+static const GLfloat g_color_buffer_data_cube2[] = {
 	1.0f,  0.0f,  0.0f,
 	1.0f,  0.0f,  0.0f,
 	1.0f,  0.0f,  0.0f,
@@ -297,24 +344,24 @@ void ShaderDrawer::drawEnemy()
 	Model = glm::scale(Model, glm::vec3(0.35f, 0.35f, 0.35f));
 	glm::mat4 bodyModel = Model;
 	MVP = Projection * View * Model;
-	drawSquare(MatrixID, g_vertex_buffer_data, g_color_buffer_data, MVP); //몸통
+	drawSquare(MatrixID, g_vertex_buffer_data_cube, g_color_buffer_data_cube2, MVP); //몸통
 
 	Model = glm::translate(Model, glm::vec3(0.0f, 0.0f, 1.0f));
 	Model = glm::scale(Model, glm::vec3(0.3f, 0.3f, 0.5f));
 	MVP = Projection * View * Model;
-	drawSquare(MatrixID, g_vertex_buffer_data, g_color_buffer_data, MVP); //머리
+	drawSquare(MatrixID, g_vertex_buffer_data_cube, g_color_buffer_data_cube2, MVP); //머리
 
 	Model = glm::translate(bodyModel, glm::vec3(0.9f, 0.0f, -0.9f));
 	Model = glm::rotate(Model, -45.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	Model = glm::scale(Model, glm::vec3(0.4f, 0.4f, 0.8f));
 	MVP = Projection * View * Model;
-	drawSquare(MatrixID, g_vertex_buffer_data, g_color_buffer_data, MVP); //오른날개
+	drawSquare(MatrixID, g_vertex_buffer_data_cube, g_color_buffer_data_cube2, MVP); //오른날개
 
 	Model = glm::translate(bodyModel, glm::vec3(-0.9f, 0.0f, -0.9f));
 	Model = glm::rotate(Model, 45.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	Model = glm::scale(Model, glm::vec3(0.4f, 0.4f, 0.8f));
 	MVP = Projection * View * Model;
-	drawSquare(MatrixID, g_vertex_buffer_data, g_color_buffer_data, MVP); //왼날개
+	drawSquare(MatrixID, g_vertex_buffer_data_cube, g_color_buffer_data_cube2, MVP); //왼날개
 }
 
 void ShaderDrawer::drawPlayer()
@@ -337,24 +384,24 @@ void ShaderDrawer::drawPlayer()
 	Model = glm::scale(Model, glm::vec3(0.35f, 0.35f, 0.35f));
 	glm::mat4 bodyModel = Model;
 	MVP = Projection * View * Model;
-	drawSquare(MatrixID, g_vertex_buffer_data, g_color_buffer_data, MVP); //몸통
+	drawSquare(MatrixID, g_vertex_buffer_data_cube, g_color_buffer_data_cube2, MVP); //몸통
 
 	Model = glm::translate(Model, glm::vec3(0.0f, 0.0f, -1.0f));
 	Model = glm::scale(Model, glm::vec3(0.3f, 0.3f, 0.5f));
 	MVP = Projection * View * Model;
-	drawSquare(MatrixID, g_vertex_buffer_data, g_color_buffer_data, MVP); //머리
+	drawSquare(MatrixID, g_vertex_buffer_data_cube, g_color_buffer_data_cube2, MVP); //머리
 
 	Model = glm::translate(bodyModel, glm::vec3(0.9f, 0.0f, 0.9f));
 	Model = glm::rotate(Model, 45.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	Model = glm::scale(Model, glm::vec3(0.4f, 0.4f, 0.8f));
 	MVP = Projection * View * Model;
-	drawSquare(MatrixID, g_vertex_buffer_data, g_color_buffer_data, MVP); //오른날개
+	drawSquare(MatrixID, g_vertex_buffer_data_cube, g_color_buffer_data_cube2, MVP); //오른날개
 
 	Model = glm::translate(bodyModel, glm::vec3(-0.9f, 0.0f, 0.9f));
 	Model = glm::rotate(Model, -45.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	Model = glm::scale(Model, glm::vec3(0.4f, 0.4f, 0.8f));
 	MVP = Projection * View * Model;
-	drawSquare(MatrixID, g_vertex_buffer_data, g_color_buffer_data, MVP); //왼날개
+	drawSquare(MatrixID, g_vertex_buffer_data_cube, g_color_buffer_data_cube2, MVP); //왼날개
 }
 
 void drawSquare(GLuint MatrixID, const GLfloat vertexbufferdata[], const GLfloat colorbufferdata[], glm::mat4 MVP)
@@ -397,6 +444,7 @@ void drawSquare(GLuint MatrixID, const GLfloat vertexbufferdata[], const GLfloat
 
 	// Draw the triangle !
 	glDrawArrays(GL_TRIANGLES, 0, 12 * 3); // 12*3 indices starting at 0 -> 12 triangles
+	//glDrawArrays(GL_LINES, 0, 12 * 2);
 
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
