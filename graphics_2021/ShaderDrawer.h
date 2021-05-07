@@ -21,6 +21,8 @@ private:
 	glm::mat4 MVP;
 	GLuint programID;
 	GLuint MatrixID;
+	void drawEnemy();
+	void drawPlayer();
 };
 
 

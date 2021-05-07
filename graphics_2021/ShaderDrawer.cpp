@@ -253,22 +253,49 @@ void ShaderDrawer::drawGame(GameManager* gameManager)
 	// Clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	Player* player = gameManager->getPlayer();
+	float playerX = gameManager->getPlayer()->getPos().x;
+	float playerZ = -gameManager->getPlayer()->getPos().y;
+
+	Enemy* enemy = gameManager->getEnemy();
+	float enemyX = enemy->getPos().x;
+	float enemyZ = -enemy->getPos().y;
+
 	// Use our shader
 	glUseProgram(programID);
 
 	View = glm::lookAt(
-		glm::vec3(0, 2, 4), // Camera is at (4,3,-3), in World Space
-		glm::vec3(0, 0, 0), // and looks at the origin
-		glm::vec3(0, 1, 0)  // Head is up (set to 0,-1,0 to look upside-down)
+		glm::vec3(playerX, 1.75, playerZ + 2), // Camera is at (4,3,-3), in World Space
+		glm::vec3(playerX, 1.75, playerZ + 1), // and looks at the origin
+		glm::vec3(0.0f, 1.0f, 0.0f)  // Head is up (set to 0,-1,0 to look upside-down)
 	);
+
+	drawEnemy();
+	drawPlayer();
+
+	// Swap buffers
+	glutSwapBuffers();
+}
+
+void ShaderDrawer::drawEnemy()
+{
+	GameManager* gameManager = GameManager::getInstance();
+	Enemy* enemy = gameManager->getEnemy();
+
+	if (enemy == NULL)
+		return;
+
+	float enemyX = enemy->getPos().x;
+	float enemyZ = -enemy->getPos().y;
+	Color enemyColor = enemy->getColor();
 
 	Model = glm::mat4(1.0f);
 	MVP = Projection * View * Model;
 
-	Model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	Model = glm::translate(glm::mat4(1.0f), glm::vec3(enemyX, 1.0f, enemyZ));
 	Model = glm::rotate(Model, 0.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 	Model = glm::scale(Model, glm::vec3(0.35f, 0.35f, 0.35f));
-	glm:mat4 bodyModel = Model;
+	glm::mat4 bodyModel = Model;
 	MVP = Projection * View * Model;
 	drawSquare(MatrixID, g_vertex_buffer_data, g_color_buffer_data, MVP); //¸öÅë
 
@@ -288,9 +315,46 @@ void ShaderDrawer::drawGame(GameManager* gameManager)
 	Model = glm::scale(Model, glm::vec3(0.4f, 0.4f, 0.8f));
 	MVP = Projection * View * Model;
 	drawSquare(MatrixID, g_vertex_buffer_data, g_color_buffer_data, MVP); //¿Þ³¯°³
+}
 
-	// Swap buffers
-	glutSwapBuffers();
+void ShaderDrawer::drawPlayer()
+{
+	GameManager* gameManager = GameManager::getInstance();
+	Player* player = gameManager->getPlayer();
+
+	if (player == NULL)
+		return;
+
+	float playerX = player->getPos().x;
+	float playerZ = -player->getPos().y;
+	Color playerColor = player->getColor();
+
+	Model = glm::mat4(1.0f);
+	MVP = Projection * View * Model;
+
+	Model = glm::translate(glm::mat4(1.0f), glm::vec3(playerX, 1.0f, playerZ));
+	Model = glm::rotate(Model, 0.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+	Model = glm::scale(Model, glm::vec3(0.35f, 0.35f, 0.35f));
+	glm::mat4 bodyModel = Model;
+	MVP = Projection * View * Model;
+	drawSquare(MatrixID, g_vertex_buffer_data, g_color_buffer_data, MVP); //¸öÅë
+
+	Model = glm::translate(Model, glm::vec3(0.0f, 0.0f, -1.0f));
+	Model = glm::scale(Model, glm::vec3(0.3f, 0.3f, 0.5f));
+	MVP = Projection * View * Model;
+	drawSquare(MatrixID, g_vertex_buffer_data, g_color_buffer_data, MVP); //¸Ó¸®
+
+	Model = glm::translate(bodyModel, glm::vec3(0.9f, 0.0f, 0.9f));
+	Model = glm::rotate(Model, 45.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	Model = glm::scale(Model, glm::vec3(0.4f, 0.4f, 0.8f));
+	MVP = Projection * View * Model;
+	drawSquare(MatrixID, g_vertex_buffer_data, g_color_buffer_data, MVP); //¿À¸¥³¯°³
+
+	Model = glm::translate(bodyModel, glm::vec3(-0.9f, 0.0f, 0.9f));
+	Model = glm::rotate(Model, -45.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	Model = glm::scale(Model, glm::vec3(0.4f, 0.4f, 0.8f));
+	MVP = Projection * View * Model;
+	drawSquare(MatrixID, g_vertex_buffer_data, g_color_buffer_data, MVP); //¿Þ³¯°³
 }
 
 void drawSquare(GLuint MatrixID, const GLfloat vertexbufferdata[], const GLfloat colorbufferdata[], glm::mat4 MVP)
