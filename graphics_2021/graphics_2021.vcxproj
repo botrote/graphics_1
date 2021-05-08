@@ -150,7 +150,6 @@
   <ItemGroup>
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Drawer.cpp" />
-    <ClCompile Include="Drawer3D.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="graphics_1.cpp" />
@@ -164,7 +163,6 @@
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="default.h" />
     <ClInclude Include="Drawer.h" />
-    <ClInclude Include="Drawer3D.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="Plane.h" />

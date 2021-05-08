@@ -27,11 +27,11 @@ GameManager::GameManager()
 	srand(time(0));
 
 	Pos plaPos1 = { Random::getRandomFloat(3, 7), Random::getRandomFloat(4, 9) };
-	Planetary* planetary1 = new Planetary(plaPos1, 1, 0.5, 0.25);
+	Planetary* planetary1 = new Planetary(plaPos1, 1, 0.7, 0.5);
 	planetaries.push_back(planetary1);
 
 	Pos plaPos2 = { Random::getRandomFloat(-7, -3), Random::getRandomFloat(4, 9) };
-	Planetary* planetary2 = new Planetary(plaPos2, 0.8, 0.4, 0.2);
+	Planetary* planetary2 = new Planetary(plaPos2, 0.8, 0.6, 0.5);
 	planetaries.push_back(planetary2);
 
 	/*

@@ -27,9 +27,6 @@
     <ClCompile Include="Enemy.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Drawer.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Bullet.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -42,10 +39,10 @@
     <ClCompile Include="Planetary.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Drawer3D.cpp">
+    <ClCompile Include="ShaderDrawer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="ShaderDrawer.cpp">
+    <ClCompile Include="Drawer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -62,9 +59,6 @@
     <ClInclude Include="Enemy.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Drawer.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Bullet.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -77,10 +71,10 @@
     <ClInclude Include="Planetary.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Drawer3D.h">
+    <ClInclude Include="ShaderDrawer.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="ShaderDrawer.h">
+    <ClInclude Include="Drawer.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
