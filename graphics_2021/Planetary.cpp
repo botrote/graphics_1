@@ -25,7 +25,7 @@ Planetary::Planetary(Pos starPos, float starRad, float planetRad, float satellit
 
 void Planetary::update()
 {
-	starAngle += 0.05;
+	starAngle += 0.3;
 	planetAngle += starRadius / 12;
 	satelliteAngle += planetRadius / 6;
 }

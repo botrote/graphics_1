@@ -186,13 +186,13 @@ void GameManager::updateState()
 	if (level >= 6 || player == NULL)
 		return;
 
-	static int enemyShootTimer = 0;
+	static int enemyShootTimer = 100;
 	static int enemyRespawnTimer = 0;
 	static int enemyMoveTimer = 0;
 
-	enemyShootTimer++;
-	enemyMoveTimer++;
-	bulletRefreshTimer -= 3 + (player->getBulletLevel());
+	enemyShootTimer+=10;
+	enemyMoveTimer+=100;
+	bulletRefreshTimer -= 10 + 10*(player->getBulletLevel());
 
 	if (player != NULL)
 		player->updateParts();
@@ -201,7 +201,7 @@ void GameManager::updateState()
 
 	if (enemy == NULL)				//다음 레벨 enemy가 나타날 때까지 대기시간
 	{
-		enemyRespawnTimer++;
+		enemyRespawnTimer+=5;
 		if (enemyRespawnTimer > 1000)
 		{
 			enemyRespawnTimer = 0;
@@ -216,7 +216,7 @@ void GameManager::updateState()
 	}
 	bullets.remove_if(bulletExpired);	//화면에서 지울 bullet 검사.
 	
-	if (enemyShootTimer > 3000 - 200 * level)		//레벨마다 enemy의 공격속도가 다름
+	if (enemyShootTimer > 2000 - 100 * level)		//레벨마다 enemy의 공격속도가 다름
 	{
 		enemyShootTimer = 0;
 		if (enemy != NULL)
@@ -228,7 +228,7 @@ void GameManager::updateState()
 		}
 	}
 
-	if (enemyMoveTimer > 450 - 30 * level)		//레벨마다 enemy의 이동속도가 다름
+	if (enemyMoveTimer > 1000 - 30 * level)		//레벨마다 enemy의 이동속도가 다름
 	{
 		enemyMoveTimer = 0;
 		if(enemy != NULL)

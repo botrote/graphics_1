@@ -254,11 +254,11 @@ void ShaderDrawer::drawGame(GameManager* gameManager)
 
 	updateViewing();
 
-	drawEnemy();
-	drawPlayer();
 	drawGrid();
 	drawBullets();
 	drawPlanetaries();
+	drawPlayer();
+	drawEnemy();
 	glutSwapBuffers();
 }
 
@@ -416,12 +416,12 @@ void ShaderDrawer::drawBullets()
 			Model = rotate(Model, radians(45.0f), vec3(0.0f, 1.0f, 0.0f));
 			MVP = Projection * View * Model;
 
-			drawSphere(0.25, MatrixID, color, MVP, true);
+			drawSphere(1, MatrixID, color, MVP, true);
 		}
 		else
 		{
 			MVP = Projection * View * Model;
-			drawSphere(0.25, MatrixID, color, MVP, true);
+			drawSphere(1, MatrixID, color, MVP, true);
 		}
 	}
 }
@@ -575,11 +575,6 @@ void drawSphere(float radius, GLuint MatrixID, const vec4 color, mat4 MVP, bool 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)(0));
 	glEnableVertexAttribArray(0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbos[1]);
-	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(vec3), normals.data(), GL_STATIC_DRAW);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_TRUE, 0, (void*)(0));
-	glEnableVertexAttribArray(2);
-
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbos[3]);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicies.size() * sizeof(GLuint), indicies.data(), GL_STATIC_DRAW);
 
@@ -613,7 +608,6 @@ void drawCube(GLuint MatrixID, const vec4 color, mat4 MVP, bool mode)
 	glUniform4fv(g_uniformColor, 1, value_ptr(color));
 	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
-	// 1rst attribute buffer : vertices
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glVertexAttribPointer(
