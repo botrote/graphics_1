@@ -121,45 +121,8 @@ void drawHiddenSphere(float width, GLuint MatrixID, const vec4 color, mat4 MVP);
 void drawHiddenCube(float width, GLuint MatrixID, const vec4 color, mat4 MVP);
 
 GLint g_uniformColor = -1;
-static const GLfloat verteces_cube[] = {
-	/*
-	-1.0f,-1.0f,-1.0f,
-	-1.0f,-1.0f, 1.0f,
-	-1.0f, 1.0f, 1.0f,
-	 1.0f, 1.0f,-1.0f,
-	-1.0f,-1.0f,-1.0f,
-	-1.0f, 1.0f,-1.0f,
-	 1.0f,-1.0f, 1.0f,
-	-1.0f,-1.0f,-1.0f,
-	 1.0f,-1.0f,-1.0f,
-	 1.0f, 1.0f,-1.0f,
-	 1.0f,-1.0f,-1.0f,
-	-1.0f,-1.0f,-1.0f,
-	-1.0f,-1.0f,-1.0f,
-	-1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f,-1.0f,
-	 1.0f,-1.0f, 1.0f,
-	-1.0f,-1.0f, 1.0f,
-	-1.0f,-1.0f,-1.0f,
-	-1.0f, 1.0f, 1.0f,
-	-1.0f,-1.0f, 1.0f,
-	 1.0f,-1.0f, 1.0f,
-	 1.0f, 1.0f, 1.0f,
-	 1.0f,-1.0f,-1.0f,
-	 1.0f, 1.0f,-1.0f,
-	 1.0f,-1.0f,-1.0f,
-	 1.0f, 1.0f, 1.0f,
-	 1.0f,-1.0f, 1.0f,
-	 1.0f, 1.0f, 1.0f,
-	 1.0f, 1.0f,-1.0f,
-	-1.0f, 1.0f,-1.0f,
-	 1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f,-1.0f,
-	-1.0f, 1.0f, 1.0f,
-	 1.0f, 1.0f, 1.0f,
-	-1.0f, 1.0f, 1.0f,
-	 1.0f,-1.0f, 1.0f
-	 */
+static const GLfloat verteces_fillCube[] = {
+
 	-1.0, -1.0, -1.0, 
 	1.0, -1.0, -1.0,
 	1.0, -1.0, 1.0,
@@ -189,6 +152,46 @@ static const GLfloat verteces_cube[] = {
 	1.0, -1.0, 1.0,
 	1.0, 1.0, 1.0,
 	-1.0, 1.0, 1.0
+};
+
+static const GLfloat verteces_lineCube[] = {
+	
+	-1.0, -1.0, -1.0,
+	1.0, -1.0, -1.0,
+
+	-1.0, -1.0, -1.0,
+	-1.0, 1.0, -1.0,
+
+	-1.0, -1.0, -1.0,
+	-1.0, -1.0, 1.0,
+
+	1.0, -1.0, 1.0,
+	-1.0, -1.0, 1.0,
+
+	1.0, -1.0, 1.0,
+	1.0, 1.0, 1.0,
+
+	1.0, -1.0, 1.0,
+	1.0, -1.0, -1.0,
+	
+	-1.0, 1.0, 1.0,
+	1.0, 1.0, 1.0,
+
+	-1.0, 1.0, 1.0,
+	-1.0, -1.0, 1.0,
+
+	-1.0, 1.0, 1.0,
+	-1.0, 1.0, -1.0,
+
+	1.0, 1.0, -1.0,
+	-1.0, 1.0, -1.0,
+	
+	1.0, 1.0, -1.0,
+	1.0, -1.0, -1.0,
+
+	1.0, 1.0, -1.0,
+	1.0, 1.0, 1.0,
+	
 };
 
 static const GLfloat verteces_square[] = {
@@ -254,11 +257,13 @@ void ShaderDrawer::drawGame(GameManager* gameManager)
 
 	updateViewing();
 
+
 	drawGrid();
 	drawBullets();
 	drawPlanetaries();
 	drawPlayer();
 	drawEnemy();
+	drawUI();
 	glutSwapBuffers();
 }
 
@@ -289,7 +294,7 @@ void ShaderDrawer::drawEnemy()
 	}
 	else
 	{
-		drawCube(MatrixID, color, MVP, false); //个烹
+		drawCube(MatrixID, color, MVP, false); 
 	}
 
 	Model = translate(Model, vec3(0.0f, 0.0f, 1.0f));
@@ -300,7 +305,7 @@ void ShaderDrawer::drawEnemy()
 	}
 	else
 	{
-		drawCube(MatrixID, color, MVP, false); //个烹
+		drawCube(MatrixID, color, MVP, false); 
 	}
 
 	Model = translate(bodyModel, vec3(0.9f, 0.0f, -0.9f));
@@ -312,7 +317,7 @@ void ShaderDrawer::drawEnemy()
 	}
 	else
 	{
-		drawCube(MatrixID, color, MVP, false); //个烹
+		drawCube(MatrixID, color, MVP, false); 
 	}
 
 	Model = translate(bodyModel, vec3(-0.9f, 0.0f, -0.9f));
@@ -324,7 +329,7 @@ void ShaderDrawer::drawEnemy()
 	}
 	else
 	{
-		drawCube(MatrixID, color, MVP, false); //个烹
+		drawCube(MatrixID, color, MVP, false); 
 	}
 }
 
@@ -434,13 +439,9 @@ void ShaderDrawer::drawGrid()
 	MVP = Projection * View * Model;
 	const vec4 white(1);
 	const vec4 blue(0.0f, 0.0f, 0.7f, 0.0f);
+	const vec4 red(1.0f, 0.0f, 0.0f, 0.0f);
 
 	drawSquare(MatrixID, white, MVP, true);
-
-	Model = mat4(1.0f);
-	
-	Model = translate(Model, vec3(0.0f, -0.49f, 0.0f));
-	MVP = Projection * View * Model;
 
 	for (int i = 0; i < 40; i++)
 	{
@@ -513,6 +514,96 @@ void ShaderDrawer::drawPlanetaries()
 		}
 
 	}
+}
+
+void ShaderDrawer::drawUI()
+{
+	GameManager* gameManager = GameManager::getInstance();
+	Player* player = gameManager->getPlayer();
+
+	if (player == NULL)
+		return;
+
+	const vec4 red(1.0f, 0.0f, 0.0f, 0.0f);
+	const vec4 black(0.0f, 0.0f, 0.0f, 0.0f);
+	const vec4 gray(0.5f, 0.5f, 0.5f, 0.0f);
+
+	float playerX = player->getPos().x;
+	float playerZ = -player->getPos().y;
+
+	bool isFirst = GameManager::getInstance()->isFirstViewing();
+
+	Model = mat4(1.0f);
+	if (isFirst)
+		Model = translate(Model, vec3(playerX, -0.5f, playerZ - 2.4));
+	else
+		Model = translate(Model, vec3(playerX, 0.0f, playerZ));
+
+	Model = rotate(Model, radians(-90.0f), vec3(1.0f, 0.0f, 0.0f));
+	Model = translate(Model, vec3(-1.05f, 0.0f, 0.97f));
+	Model = scale(Model, vec3(0.03f, 0.03f, 0.03f));
+	mat4 tempModel = Model;
+	MVP = Projection * View * Model;
+
+	if (gameManager->isAllFail())
+	{
+		drawSquare(MatrixID, red, MVP, true);
+		Model = translate(Model, vec3(-0.065f, 0.1f, 0.0f));
+		Model = scale(Model, vec3(1.2f, 1.0f, 1.2f));
+		MVP = Projection * View * Model;
+		drawSquare(MatrixID, gray, MVP, true);
+
+		Model = translate(Model, vec3(0.0f, -0.15f, 0.1f));
+		Model = rotate(Model, radians(-45.0f), vec3(0.0f, 1.0f, 0.0f));
+		Model = scale(Model, vec3(0.2f, 1.0f, 1.225f));
+		MVP = Projection * View * Model;
+		drawSquare(MatrixID, gray, MVP, true);
+	}
+	else
+	{
+		drawSquare(MatrixID, red, MVP, true);
+		for (int i = 1; i < player->getHealth(); i++)
+		{
+			Model = translate(Model, vec3(2.75f, 0.0f, 0.0f));
+			MVP = Projection * View * Model;
+			drawSquare(MatrixID, red, MVP, true);
+		}
+	}
+		
+	Enemy* enemy = gameManager->getEnemy();
+	if (enemy == NULL)
+		return;
+
+	Model = translate(tempModel, vec3(0.0f, 0.0f, 51.5f));
+	MVP = Projection * View * Model;
+
+	if (gameManager->isAllPass())
+	{
+		drawSquare(MatrixID, red, MVP, true);
+		Model = translate(Model, vec3(-0.065f, 0.1f, 0.1f));
+		Model = scale(Model, vec3(1.2f, 1.0f, 1.2f));
+		MVP = Projection * View * Model;
+		drawSquare(MatrixID, gray, MVP, true);
+
+		Model = translate(Model, vec3(0.05f, -0.15f, -0.05f));
+		Model = rotate(Model, radians(-45.0f), vec3(0.0f, 1.0f, 0.0f));
+		Model = scale(Model, vec3(0.2f, 1.0f, 1.225f));
+		MVP = Projection * View * Model;
+		drawSquare(MatrixID, gray, MVP, true);
+	}
+	else
+	{
+		drawSquare(MatrixID, red, MVP, true);
+		for (int i = 1; i < enemy->getHealth(); i++)
+		{
+			Model = translate(Model, vec3(2.75f, 0.0f, 0.0f));
+			MVP = Projection * View * Model;
+			drawSquare(MatrixID, red, MVP, true);
+		}
+	}
+	
+	
+
 }
 
 void drawSphere(float radius, GLuint MatrixID, const vec4 color, mat4 MVP, bool mode)
@@ -600,10 +691,15 @@ void drawSphere(float radius, GLuint MatrixID, const vec4 color, mat4 MVP, bool 
 
 void drawCube(GLuint MatrixID, const vec4 color, mat4 MVP, bool mode)
 {
+
 	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_cube), verteces_cube, GL_STATIC_DRAW);
+
+	if(mode)
+		glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_fillCube), verteces_fillCube, GL_STATIC_DRAW);
+	else
+		glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_lineCube), verteces_lineCube, GL_STATIC_DRAW);
 
 	glUniform4fv(g_uniformColor, 1, value_ptr(color));
 	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
@@ -619,14 +715,13 @@ void drawCube(GLuint MatrixID, const vec4 color, mat4 MVP, bool mode)
 		(void*)0            // array buffer offset
 	);
 
-
-	if (mode == 1)
+	if (mode == true)
 	{
 		glDrawArrays(GL_QUADS, 0, 4 * 6);
 	}
 	else
 	{
-		glDrawArrays(GL_LINE_LOOP, 0, 4 * 6);
+		glDrawArrays(GL_LINES, 0, 2 * 12);
 	}
 
 	glDisableVertexAttribArray(0);
@@ -635,11 +730,13 @@ void drawCube(GLuint MatrixID, const vec4 color, mat4 MVP, bool mode)
 
 void drawSquare(GLuint MatrixID, const vec4 color, mat4 MVP, bool isFill)
 {
+	/*
 	if (isFill)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	else
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+		*/
 	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -660,7 +757,10 @@ void drawSquare(GLuint MatrixID, const vec4 color, mat4 MVP, bool isFill)
 		(void*)0            // array buffer offset
 	);
 
-	glDrawArrays(GL_QUADS, 0, 4); // 12*3 indices starting at 0 -> 12 triangles
+	if(isFill)
+		glDrawArrays(GL_QUADS, 0, 15); 
+	else
+		glDrawArrays(GL_LINE_LOOP, 0, 4);
 
 	glDisableVertexAttribArray(0);
 	glDeleteBuffers(1, &vertexbuffer);

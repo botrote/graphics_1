@@ -27,6 +27,7 @@ private:
 	void drawBullets();
 	void drawGrid();
 	void drawPlanetaries();
+	void drawUI();
 };
 
 
