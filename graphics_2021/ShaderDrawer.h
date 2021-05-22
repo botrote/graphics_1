@@ -23,6 +23,13 @@ private:
 	GLuint MatrixMV;
 	GLuint MatrixP;
 
+	GLuint planeTexture;
+	GLuint bulletTexture;
+	GLuint itemTexture;
+	GLuint starTexture;
+	GLuint planetTexture;
+	GLuint satteliteTexture;
+
 	void updateViewing();
 	void drawEnemy();
 	void drawPlayer();
