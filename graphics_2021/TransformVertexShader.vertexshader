@@ -16,7 +16,7 @@ void main(){
 	// Output position of the vertex, in clip space : MVP * position
 	// gl_Position =  Projection * ModelView * vec4(vPosition,1);
 	
-	vec3 pos = (ModelView * vPosition).xyz;
+	vec3 pos = (ModelView * vec4(vPosition,1)).xyz;
 
 	vec3 L = normalize( LightPosition.xyz - pos );
 	vec3 E = normalize( -pos );

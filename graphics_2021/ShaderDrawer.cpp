@@ -121,6 +121,15 @@ void drawHiddenSphere(float width,  const vec4 color, GLuint MatrixMV, GLuint Ma
 void drawHiddenCube(float width, const vec4 color, GLuint MatrixMV, GLuint MatrixP, mat4 MV, mat4 P);
 
 GLint g_uniformColor = -1;
+GLint AmbientProduct, DiffuseProduct, SpecularProduct, LightPosition, Shininess;
+vec4 light_position(0.0, 0.0, -1.0, 0.0);
+vec4 light_ambient(0.2, 0.2, 0.2, 1.0);
+vec4 light_diffuse(1.0, 1.0, 1.0, 1.0);
+vec4 light_specular(1.0, 1.0, 1.0, 1.0);
+
+vec4 material_specular(1.0, 1.0, 1.0, 1.0);
+float material_shininess = 5.0;
+
 static const GLfloat verteces_fillCube[] = {
 
 	-1.0, -1.0, -1.0,
@@ -221,9 +230,16 @@ ShaderDrawer::ShaderDrawer()
 {
 	programID = LoadShaders("TransformVertexShader.vertexshader", "ColorFragmentShader.fragmentshader");
 
-	g_uniformColor = glGetUniformLocation(programID, "color");
+	//g_uniformColor = glGetUniformLocation(programID, "color");
 	MatrixMV = glGetUniformLocation(programID, "ModelView");
 	MatrixP = glGetUniformLocation(programID, "Projection");
+
+	// Initialize shader lighting parameters
+	AmbientProduct = glGetUniformLocation(programID, "AmbientProduct");
+	DiffuseProduct = glGetUniformLocation(programID, "DiffuseProduct");
+	SpecularProduct = glGetUniformLocation(programID, "SpecularProduct");
+	LightPosition = glGetUniformLocation(programID, "LightPosition");
+	Shininess = glGetUniformLocation(programID, "Shininess");
 
 	Projection = perspective(radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
 	// Camera matrix
@@ -690,11 +706,29 @@ void drawSphere(float radius, const vec4 color, bool mode)
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)(0));
 	glEnableVertexAttribArray(0);
 
+	glBindBuffer(GL_ARRAY_BUFFER, vbos[1]);
+	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(vec3), normals.data(), GL_STATIC_DRAW);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_TRUE, 0, (void *)(0));
+	glEnableVertexAttribArray(2);
+
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbos[3]);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicies.size() * sizeof(GLuint), indicies.data(), GL_STATIC_DRAW);
 
-	glBindVertexArray(vao);
-	glUniform4fv(g_uniformColor, 1, value_ptr(color));
+	//glBindVertexArray(vao);
+	//glUniform4fv(g_uniformColor, 1, value_ptr(color));
+
+	vec4 material_diffuse(color.r * 0.8, color.g * 0.8, color.b * 0.8, 1.0);
+
+	vec4 ambient_product = light_ambient * color;
+	vec4 diffuse_product = light_diffuse * material_diffuse;
+	vec4 specular_product = light_specular * material_specular;
+
+	glUniform4fv(AmbientProduct, 1, value_ptr(ambient_product));
+	glUniform4fv(DiffuseProduct, 1, value_ptr(diffuse_product));
+	glUniform4fv(SpecularProduct, 1, value_ptr(specular_product));
+	glUniform4fv(LightPosition, 1, value_ptr(light_position));
+	glUniform1f(Shininess, material_shininess);
+
 
 	if (mode == 1)
 	{
@@ -723,8 +757,20 @@ void drawCube(const vec4 color, bool mode)
 		glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_fillCube), verteces_fillCube, GL_STATIC_DRAW);
 	else
 		glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_lineCube), verteces_lineCube, GL_STATIC_DRAW);
+	
+	//glUniform4fv(g_uniformColor, 1, value_ptr(color));
+	vec4 material_diffuse(color.r * 0.8, color.g * 0.8, color.b * 0.8, 1.0);
 
-	glUniform4fv(g_uniformColor, 1, value_ptr(color));
+	vec4 ambient_product = light_ambient * color;
+	vec4 diffuse_product = light_diffuse * material_diffuse;
+	vec4 specular_product = light_specular * material_specular;
+
+	glUniform4fv(AmbientProduct, 1, value_ptr(ambient_product));
+	glUniform4fv(DiffuseProduct, 1, value_ptr(diffuse_product));
+	glUniform4fv(SpecularProduct, 1, value_ptr(specular_product));
+	glUniform4fv(LightPosition, 1, value_ptr(light_position));
+	glUniform1f(Shininess, material_shininess);
+
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glVertexAttribPointer(
@@ -763,7 +809,18 @@ void drawSquare(const vec4 color, bool isFill)
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_square), verteces_square, GL_STATIC_DRAW);
 
-	glUniform4fv(g_uniformColor, 1, value_ptr(color));
+	//glUniform4fv(g_uniformColor, 1, value_ptr(color));
+	vec4 material_diffuse(color.r * 0.8, color.g * 0.8, color.b * 0.8, 1.0);
+
+	vec4 ambient_product = light_ambient * color;
+	vec4 diffuse_product = light_diffuse * color;
+	vec4 specular_product = light_specular * material_specular;
+
+	glUniform4fv(AmbientProduct, 1, value_ptr(ambient_product));
+	glUniform4fv(DiffuseProduct, 1, value_ptr(diffuse_product));
+	glUniform4fv(SpecularProduct, 1, value_ptr(specular_product));
+	glUniform4fv(LightPosition, 1, value_ptr(light_position));
+	glUniform1f(Shininess, material_shininess);
 
 	// 1rst attribute buffer : vertices
 	glEnableVertexAttribArray(0);
@@ -793,7 +850,18 @@ void drawLine(const vec4 color)
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_line), verteces_line, GL_STATIC_DRAW);
 
-	glUniform4fv(g_uniformColor, 1, value_ptr(color));
+	//glUniform4fv(g_uniformColor, 1, value_ptr(color));
+	vec4 material_diffuse(color.r * 0.8, color.g * 0.8, color.b * 0.8, 1.0);
+
+	vec4 ambient_product = light_ambient * color;
+	vec4 diffuse_product = light_diffuse * color;
+	vec4 specular_product = light_specular * material_specular;
+
+	glUniform4fv(AmbientProduct, 1, value_ptr(ambient_product));
+	glUniform4fv(DiffuseProduct, 1, value_ptr(diffuse_product));
+	glUniform4fv(SpecularProduct, 1, value_ptr(specular_product));
+	glUniform4fv(LightPosition, 1, value_ptr(light_position));
+	glUniform1f(Shininess, material_shininess);
 
 	// 1rst attribute buffer : vertices
 	glEnableVertexAttribArray(0);
