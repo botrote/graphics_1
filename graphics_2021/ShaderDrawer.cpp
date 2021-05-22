@@ -18,7 +18,7 @@
 #include <glm/gtx/transform.hpp>
 using namespace glm;
 
-GLuint LoadShaders(const char* vertex_file_path, const char* fragment_file_path) 
+GLuint LoadShaders(const char* vertex_file_path, const char* fragment_file_path)
 {
 	glewInit();
 	// Create the shaders
@@ -113,17 +113,17 @@ GLuint LoadShaders(const char* vertex_file_path, const char* fragment_file_path)
 
 	return ProgramID;
 }
-void drawCube(GLuint MatrixID, const vec4 color, mat4 MVP, bool mode);
-void drawSquare(GLuint MatrixID, const vec4 color, mat4 MVP, bool isFill);
-void drawLine(GLuint MatrixID, const vec4 color, mat4 MVP);
-void drawSphere(float radius, GLuint MatrixID, const vec4 color, mat4 MVP, bool mode);
-void drawHiddenSphere(float width, GLuint MatrixID, const vec4 color, mat4 MVP);
-void drawHiddenCube(float width, GLuint MatrixID, const vec4 color, mat4 MVP);
+void drawCube(const vec4 color, bool mode);
+void drawSquare(const vec4 color, bool isFill);
+void drawLine(const vec4 color);
+void drawSphere(float radius, const vec4 color, bool mode);
+void drawHiddenSphere(float width,  const vec4 color, GLuint MatrixMV, GLuint MatrixP, mat4 MV, mat4 P);
+void drawHiddenCube(float width, const vec4 color, GLuint MatrixMV, GLuint MatrixP, mat4 MV, mat4 P);
 
 GLint g_uniformColor = -1;
 static const GLfloat verteces_fillCube[] = {
 
-	-1.0, -1.0, -1.0, 
+	-1.0, -1.0, -1.0,
 	1.0, -1.0, -1.0,
 	1.0, -1.0, 1.0,
 	-1.0, -1.0, 1.0,
@@ -155,7 +155,7 @@ static const GLfloat verteces_fillCube[] = {
 };
 
 static const GLfloat verteces_lineCube[] = {
-	
+
 	-1.0, -1.0, -1.0,
 	1.0, -1.0, -1.0,
 
@@ -173,7 +173,7 @@ static const GLfloat verteces_lineCube[] = {
 
 	1.0, -1.0, 1.0,
 	1.0, -1.0, -1.0,
-	
+
 	-1.0, 1.0, 1.0,
 	1.0, 1.0, 1.0,
 
@@ -185,13 +185,13 @@ static const GLfloat verteces_lineCube[] = {
 
 	1.0, 1.0, -1.0,
 	-1.0, 1.0, -1.0,
-	
+
 	1.0, 1.0, -1.0,
 	1.0, -1.0, -1.0,
 
 	1.0, 1.0, -1.0,
 	1.0, 1.0, 1.0,
-	
+
 };
 
 static const GLfloat verteces_square[] = {
@@ -222,13 +222,14 @@ ShaderDrawer::ShaderDrawer()
 	programID = LoadShaders("TransformVertexShader.vertexshader", "ColorFragmentShader.fragmentshader");
 
 	g_uniformColor = glGetUniformLocation(programID, "color");
-	MatrixID = glGetUniformLocation(programID, "MVP");
+	MatrixMV = glGetUniformLocation(programID, "ModelView");
+	MatrixP = glGetUniformLocation(programID, "Projection");
 
 	Projection = perspective(radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
 	// Camera matrix
 	mat4 View = mat4(1.0f);
 	Model = mat4(1.0f);
-	MVP = Projection * View * Model;
+	MV = View * Model;
 }
 
 void ShaderDrawer::updateViewing()
@@ -282,54 +283,56 @@ void ShaderDrawer::drawEnemy()
 	const vec4 color(enemyColor.r, enemyColor.g, enemyColor.b, 0.0f);
 
 	Model = mat4(1.0f);
-	MVP = Projection * View * Model;
-
 	Model = translate(mat4(1.0f), vec3(enemyX, 1.0f, enemyZ));
 	Model = rotate(Model, 0.0f, vec3(0.0f, 0.0f, 1.0f));
 	Model = scale(Model, vec3(0.35f, 0.35f, 0.35f));
 	mat4 bodyModel = Model;
-	MVP = Projection * View * Model;
+	MV = View * Model;
 	if (hidden_rendering_mode) {
-		drawHiddenCube(0.35, MatrixID, color, MVP);
+		drawHiddenCube(0.35, color, MatrixMV, MatrixP, MV, Projection);
 	}
 	else
 	{
-		drawCube(MatrixID, color, MVP, false); 
+		updateMatrix();
+		drawCube(color, false);
 	}
 
 	Model = translate(Model, vec3(0.0f, 0.0f, 1.0f));
 	Model = scale(Model, vec3(0.3f, 0.3f, 0.5f));
-	MVP = Projection * View * Model;
+	MV = Projection * View * Model;
 	if (hidden_rendering_mode) {
-		drawHiddenCube(0.3, MatrixID, color, MVP);
+		drawHiddenCube(0.3, color, MatrixMV, MatrixP, MV, Projection);
 	}
 	else
 	{
-		drawCube(MatrixID, color, MVP, false); 
+		updateMatrix();
+		drawCube(color, false);
 	}
 
 	Model = translate(bodyModel, vec3(0.9f, 0.0f, -0.9f));
 	Model = rotate(Model, -45.0f, vec3(0.0f, 1.0f, 0.0f));
 	Model = scale(Model, vec3(0.4f, 0.4f, 0.8f));
-	MVP = Projection * View * Model;
+	MV = View * Model;
 	if (hidden_rendering_mode) {
-		drawHiddenCube(0.4, MatrixID, color, MVP);
+		drawHiddenCube(0.4, color, MatrixMV, MatrixP, MV, Projection);
 	}
 	else
 	{
-		drawCube(MatrixID, color, MVP, false); 
+		updateMatrix();
+		drawCube( color, false);
 	}
 
 	Model = translate(bodyModel, vec3(-0.9f, 0.0f, -0.9f));
 	Model = rotate(Model, 45.0f, vec3(0.0f, 1.0f, 0.0f));
 	Model = scale(Model, vec3(0.4f, 0.4f, 0.8f));
-	MVP = Projection * View * Model;
+	MV = View * Model;
 	if (hidden_rendering_mode) {
-		drawHiddenCube(0.4, MatrixID, color, MVP);
+		drawHiddenCube(0.4, color, MatrixMV, MatrixP, MV, Projection);
 	}
 	else
 	{
-		drawCube(MatrixID, color, MVP, false); 
+		updateMatrix();
+		drawCube( color, false);
 	}
 }
 
@@ -349,53 +352,57 @@ void ShaderDrawer::drawPlayer()
 	const vec4 color(playerColor.r, playerColor.g, playerColor.b, 0.0f);
 
 	Model = mat4(1.0f);
-	MVP = Projection * View * Model;
+	MV = View * Model;
 
 	Model = translate(mat4(1.0f), vec3(playerX, 1.0f, playerZ));
 	Model = scale(Model, vec3(0.35f, 0.35f, 0.35f));
 	mat4 bodyModel = Model;
-	MVP = Projection * View * Model;
+	MV = View * Model;
 	if (hidden_rendering_mode) {
-		drawHiddenCube(0.35, MatrixID, color, MVP);
+		drawHiddenCube(0.35, color, MatrixMV, MatrixP, MV, Projection);
 	}
 	else
 	{
-		drawCube(MatrixID, color, MVP, false); //¸öÅë
+		updateMatrix();
+		drawCube( color, false); //¸öÅë
 	}
 
 	Model = translate(Model, vec3(0.0f, 0.0f, -1.0f));
 	Model = scale(Model, vec3(0.3f, 0.3f, 0.5f));
-	MVP = Projection * View * Model;
+	MV = View * Model;
 	if (hidden_rendering_mode) {
-		drawHiddenCube(0.3, MatrixID, color, MVP);
+		drawHiddenCube(0.3, color, MatrixMV, MatrixP, MV, Projection);
 	}
 	else
 	{
-		drawCube(MatrixID, color, MVP, false); //¸öÅë
+		updateMatrix();
+		drawCube(color, false); //¸öÅë
 	}
 
 	Model = translate(bodyModel, vec3(0.9f, 0.0f, 0.9f));
 	Model = rotate(Model, 45.0f, vec3(0.0f, 1.0f, 0.0f));
 	Model = scale(Model, vec3(0.4f, 0.4f, 0.8f));
-	MVP = Projection * View * Model;
+	MV = View * Model;
 	if (hidden_rendering_mode) {
-		drawHiddenCube(0.4, MatrixID, color, MVP);
+		drawHiddenCube(0.4, color, MatrixMV, MatrixP, MV, Projection);
 	}
 	else
 	{
-		drawCube(MatrixID, color, MVP, false); //¸öÅë
+		updateMatrix();
+		drawCube(color, false); //¸öÅë
 	}
 
 	Model = translate(bodyModel, vec3(-0.9f, 0.0f, 0.9f));
 	Model = rotate(Model, -45.0f, vec3(0.0f, 1.0f, 0.0f));
 	Model = scale(Model, vec3(0.4f, 0.4f, 0.8f));
-	MVP = Projection * View * Model;
+	MV = View * Model;
 	if (hidden_rendering_mode) {
-		drawHiddenCube(0.4, MatrixID, color, MVP);
+		drawHiddenCube(0.4, color, MatrixMV, MatrixP, MV, Projection);
 	}
 	else
 	{
-		drawCube(MatrixID, color, MVP, false); //¸öÅë
+		updateMatrix();
+		drawCube(color, false); //¸öÅë
 	}
 }
 
@@ -419,14 +426,15 @@ void ShaderDrawer::drawBullets()
 		{
 			Model = rotate(Model, radians(45.0f), vec3(0.0f, 0.0f, 1.0f));
 			Model = rotate(Model, radians(45.0f), vec3(0.0f, 1.0f, 0.0f));
-			MVP = Projection * View * Model;
-
-			drawSphere(1, MatrixID, color, MVP, true);
+			MV = View * Model;
+			updateMatrix();
+			drawSphere(1, color, true);
 		}
 		else
 		{
-			MVP = Projection * View * Model;
-			drawSphere(1, MatrixID, color, MVP, true);
+			MV = View * Model;
+			updateMatrix();
+			drawSphere(1, color, true);
 		}
 	}
 }
@@ -436,28 +444,31 @@ void ShaderDrawer::drawGrid()
 	Model = mat4(1.0f);
 	Model = translate(Model, vec3(0.0f, -0.5f, 0.0f));
 	Model = scale(Model, vec3(6.0f, 1.0f, 11.0f));
-	MVP = Projection * View * Model;
+	MV = View * Model;
 	const vec4 white(1);
 	const vec4 blue(0.0f, 0.0f, 0.7f, 0.0f);
 	const vec4 red(1.0f, 0.0f, 0.0f, 0.0f);
 
-	drawSquare(MatrixID, white, MVP, true);
+	updateMatrix();
+	drawSquare( white, true);
 
 	for (int i = 0; i < 40; i++)
 	{
 		Model = mat4(1.0f);
 		Model = translate(Model, vec3(0.0f, -0.49f, -20.0f + i));
 		Model = scale(Model, vec3(20.0f, 1.0f, 1.0f));
-		MVP = Projection * View * Model;
-		drawLine(MatrixID, blue, MVP);
+		MV = View * Model;
+		updateMatrix();
+		drawLine( blue);
 
 		Model = mat4(1.0f);
 		Model = translate(Model, vec3(-20.0f + i, -0.49f, 0.0f));
 		Model = rotate(Model, radians(90.0f), vec3(0.0f, 1.0f, 0.0f));
-		
+
 		Model = scale(Model, vec3(20.0f, 1.0f, 1.0f));
-		MVP = Projection * View * Model;
-		drawLine(MatrixID, blue, MVP);
+		MV = View * Model;
+		updateMatrix();
+		drawLine(blue);
 	}
 
 }
@@ -473,44 +484,47 @@ void ShaderDrawer::drawPlanetaries()
 		Model = translate(Model, vec3(planetary->starPosition.x, 0.5f, -planetary->starPosition.y));
 		Model = rotate(Model, radians(planetary->starAngle), vec3(0.0f, 1.0f, 0.0f));
 		Model = scale(Model, vec3(planetary->starRadius));
-		MVP = Projection * View * Model;
+		MV = View * Model;
 
 		const vec4 color(planetary->starColor.r, planetary->starColor.g, planetary->starColor.b, 0.0f);
 
 		if (hidden_rendering_mode) {
-			drawHiddenSphere(planetary->starRadius, MatrixID, color, MVP);
+			drawHiddenSphere(planetary->starRadius, color, MatrixMV, MatrixP, MV, Projection);
 		}
 		else
 		{
-			drawSphere(planetary->starRadius, MatrixID, color, MVP, hidden_rendering_mode);
+			updateMatrix();
+			drawSphere(planetary->starRadius, color, hidden_rendering_mode);
 		}
 
 		Model = rotate(Model, radians(planetary->planetAngle), vec3(0.0f, 1.0f, 0.0f));
 		Model = translate(Model, vec3(planetary->planetRevoRadius, 0.0f, 0.0f));
 		Model = scale(Model, vec3(planetary->planetRadius));
-		MVP = Projection * View * Model;
+		MV = View * Model;
 		const vec4 colorPlanet(planetary->planetColor.r, planetary->planetColor.g, planetary->planetColor.b, 0.0f);
 
 		if (hidden_rendering_mode) {
-			drawHiddenSphere(planetary->planetRadius, MatrixID, colorPlanet, MVP);
+			drawHiddenSphere(planetary->planetRadius, colorPlanet, MatrixMV, MatrixP, MV, Projection);
 		}
 		else
 		{
-			drawSphere(planetary->planetRadius, MatrixID, colorPlanet, MVP, hidden_rendering_mode);
+			updateMatrix();
+			drawSphere(planetary->planetRadius, colorPlanet, hidden_rendering_mode);
 		}
 
 		Model = rotate(Model, radians(planetary->satelliteAngle), vec3(0.0f, 1.0f, 0.0f));
 		Model = translate(Model, vec3(0.0f, 0.0f, planetary->satelliteRevoRadius));
 		Model = scale(Model, vec3(planetary->satelliteRadius));
-		MVP = Projection * View * Model;
+		MV = View * Model;
 
 		const vec4 colorSatellite(planetary->satelliteColor.r, planetary->satelliteColor.g, planetary->satelliteColor.b, 0.0f);
 		if (hidden_rendering_mode) {
-			drawHiddenSphere(planetary->satelliteRadius, MatrixID, colorPlanet, MVP);
+			drawHiddenSphere(planetary->satelliteRadius, colorPlanet, MatrixMV, MatrixP, MV, Projection);
 		}
 		else
 		{
-			drawSphere(planetary->satelliteRadius, MatrixID, colorSatellite, MVP, hidden_rendering_mode);
+			updateMatrix();
+			drawSphere(planetary->satelliteRadius, colorSatellite, hidden_rendering_mode);
 		}
 
 	}
@@ -543,70 +557,80 @@ void ShaderDrawer::drawUI()
 	Model = translate(Model, vec3(-1.05f, 0.0f, 0.97f));
 	Model = scale(Model, vec3(0.03f, 0.03f, 0.03f));
 	mat4 tempModel = Model;
-	MVP = Projection * View * Model;
+	MV = View * Model;
 
 	if (gameManager->isAllFail())
 	{
-		drawSquare(MatrixID, red, MVP, true);
+		updateMatrix();
+		drawSquare(red, true);
 		Model = translate(Model, vec3(-0.065f, 0.1f, 0.0f));
 		Model = scale(Model, vec3(1.2f, 1.0f, 1.2f));
-		MVP = Projection * View * Model;
-		drawSquare(MatrixID, gray, MVP, true);
+		MV = View * Model;
+		updateMatrix();
+		drawSquare(gray, true);
 
 		Model = translate(Model, vec3(0.0f, -0.15f, 0.1f));
 		Model = rotate(Model, radians(-45.0f), vec3(0.0f, 1.0f, 0.0f));
 		Model = scale(Model, vec3(0.2f, 1.0f, 1.225f));
-		MVP = Projection * View * Model;
-		drawSquare(MatrixID, gray, MVP, true);
+		MV = View * Model;
+		updateMatrix();
+		drawSquare(gray, true);
 	}
 	else
 	{
-		drawSquare(MatrixID, red, MVP, true);
+		updateMatrix();
+		drawSquare(red, true);
 		for (int i = 1; i < player->getHealth(); i++)
 		{
 			Model = translate(Model, vec3(2.75f, 0.0f, 0.0f));
-			MVP = Projection * View * Model;
-			drawSquare(MatrixID, red, MVP, true);
+			MV = View * Model;
+			updateMatrix();
+			drawSquare( red, true);
 		}
 	}
-		
+
 	Enemy* enemy = gameManager->getEnemy();
 	if (enemy == NULL)
 		return;
 
 	Model = translate(tempModel, vec3(0.0f, 0.0f, 51.5f));
-	MVP = Projection * View * Model;
+	MV = View * Model;
 
 	if (gameManager->isAllPass())
 	{
-		drawSquare(MatrixID, red, MVP, true);
+		updateMatrix();
+		drawSquare(red, true);
 		Model = translate(Model, vec3(-0.065f, 0.1f, 0.1f));
 		Model = scale(Model, vec3(1.2f, 1.0f, 1.2f));
-		MVP = Projection * View * Model;
-		drawSquare(MatrixID, gray, MVP, true);
+		MV = View * Model;
+		updateMatrix();
+		drawSquare( gray, true);
 
 		Model = translate(Model, vec3(0.05f, -0.15f, -0.05f));
 		Model = rotate(Model, radians(-45.0f), vec3(0.0f, 1.0f, 0.0f));
 		Model = scale(Model, vec3(0.2f, 1.0f, 1.225f));
-		MVP = Projection * View * Model;
-		drawSquare(MatrixID, gray, MVP, true);
+		MV = View * Model;
+		updateMatrix();
+		drawSquare(gray, true);
 	}
 	else
 	{
-		drawSquare(MatrixID, red, MVP, true);
+		updateMatrix();
+		drawSquare(red, true);
 		for (int i = 1; i < enemy->getHealth(); i++)
 		{
 			Model = translate(Model, vec3(2.75f, 0.0f, 0.0f));
-			MVP = Projection * View * Model;
-			drawSquare(MatrixID, red, MVP, true);
+			MV = View * Model;
+			updateMatrix();
+			drawSquare(red, true);
 		}
 	}
-	
-	
+
+
 
 }
 
-void drawSphere(float radius, GLuint MatrixID, const vec4 color, mat4 MVP, bool mode)
+void drawSphere(float radius, const vec4 color, bool mode)
 {
 	int slices = 20;
 	int stacks = 20;
@@ -671,7 +695,6 @@ void drawSphere(float radius, GLuint MatrixID, const vec4 color, mat4 MVP, bool 
 
 	glBindVertexArray(vao);
 	glUniform4fv(g_uniformColor, 1, value_ptr(color));
-	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
 	if (mode == 1)
 	{
@@ -689,21 +712,19 @@ void drawSphere(float radius, GLuint MatrixID, const vec4 color, mat4 MVP, bool 
 
 }
 
-void drawCube(GLuint MatrixID, const vec4 color, mat4 MVP, bool mode)
+void drawCube(const vec4 color, bool mode)
 {
 
 	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 
-	if(mode)
+	if (mode)
 		glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_fillCube), verteces_fillCube, GL_STATIC_DRAW);
 	else
 		glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_lineCube), verteces_lineCube, GL_STATIC_DRAW);
 
 	glUniform4fv(g_uniformColor, 1, value_ptr(color));
-	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glVertexAttribPointer(
@@ -728,7 +749,7 @@ void drawCube(GLuint MatrixID, const vec4 color, mat4 MVP, bool mode)
 	glDeleteBuffers(1, &vertexbuffer);
 }
 
-void drawSquare(GLuint MatrixID, const vec4 color, mat4 MVP, bool isFill)
+void drawSquare(const vec4 color, bool isFill)
 {
 	/*
 	if (isFill)
@@ -743,7 +764,6 @@ void drawSquare(GLuint MatrixID, const vec4 color, mat4 MVP, bool isFill)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_square), verteces_square, GL_STATIC_DRAW);
 
 	glUniform4fv(g_uniformColor, 1, value_ptr(color));
-	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
 	// 1rst attribute buffer : vertices
 	glEnableVertexAttribArray(0);
@@ -757,8 +777,8 @@ void drawSquare(GLuint MatrixID, const vec4 color, mat4 MVP, bool isFill)
 		(void*)0            // array buffer offset
 	);
 
-	if(isFill)
-		glDrawArrays(GL_QUADS, 0, 15); 
+	if (isFill)
+		glDrawArrays(GL_QUADS, 0, 15);
 	else
 		glDrawArrays(GL_LINE_LOOP, 0, 4);
 
@@ -766,7 +786,7 @@ void drawSquare(GLuint MatrixID, const vec4 color, mat4 MVP, bool isFill)
 	glDeleteBuffers(1, &vertexbuffer);
 }
 
-void drawLine(GLuint MatrixID, const vec4 color, mat4 MVP)
+void drawLine(const vec4 color)
 {
 	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
@@ -774,7 +794,6 @@ void drawLine(GLuint MatrixID, const vec4 color, mat4 MVP)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_line), verteces_line, GL_STATIC_DRAW);
 
 	glUniform4fv(g_uniformColor, 1, value_ptr(color));
-	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
 	// 1rst attribute buffer : vertices
 	glEnableVertexAttribArray(0);
@@ -795,30 +814,47 @@ void drawLine(GLuint MatrixID, const vec4 color, mat4 MVP)
 	glDeleteBuffers(1, &vertexbuffer);
 }
 
-void drawHiddenSphere(float width, GLuint MatrixID, const vec4 color, mat4 MVP)
+void drawHiddenSphere(float width,const vec4 color, GLuint MatrixMV, GLuint MatrixP, mat4 MV, mat4 Projection)
 {
 	glColorMask(false, false, false, false);
 	glEnable(GL_POLYGON_OFFSET_FILL);
 	glPolygonOffset(width * 0.8, 1);
-	drawSphere(width, MatrixID, color, MVP, 1);
+	glUniformMatrix4fv(MatrixMV, 1, GL_FALSE, &MV[0][0]);
+	glUniformMatrix4fv(MatrixP, 1, GL_FALSE, &Projection[0][0]);
+	drawSphere(width, color, 1);
 
 	glDepthMask(GL_FALSE);
 	glColorMask(true, true, true, true);
 	glDisable(GL_POLYGON_OFFSET_FILL);
-	drawSphere(width, MatrixID, color, MVP, 0);
+	glUniformMatrix4fv(MatrixMV, 1, GL_FALSE, &MV[0][0]);
+	glUniformMatrix4fv(MatrixP, 1, GL_FALSE, &Projection[0][0]);
+	drawSphere(width, color, 0);
 	glDepthMask(GL_TRUE);
 }
 
-void drawHiddenCube(float width, GLuint MatrixID, const vec4 color, mat4 MVP)
+void drawHiddenCube(float width, const vec4 color, GLuint MatrixMV, GLuint MatrixP, mat4 MV, mat4 Projection)
 {
 	glColorMask(false, false, false, false);
 	glEnable(GL_POLYGON_OFFSET_FILL);
 	glPolygonOffset(width * 0.8, 1);
-	drawCube(MatrixID, color, MVP, 1);
+	glUniformMatrix4fv(MatrixMV, 1, GL_FALSE, &MV[0][0]);
+	glUniformMatrix4fv(MatrixP, 1, GL_FALSE, &Projection[0][0]);
+	drawCube(color, 1);
 
 	glDepthMask(GL_FALSE);
 	glColorMask(true, true, true, true);
 	glDisable(GL_POLYGON_OFFSET_FILL);
-	drawCube(MatrixID, color, MVP, 0);
+	glUniformMatrix4fv(MatrixMV, 1, GL_FALSE, &MV[0][0]);
+	glUniformMatrix4fv(MatrixP, 1, GL_FALSE, &Projection[0][0]);
+	drawCube(color, 0);
 	glDepthMask(GL_TRUE);
 }
+
+void ShaderDrawer::updateMatrix() {
+	glUniformMatrix4fv(MatrixMV, 1, GL_FALSE, &MV[0][0]);
+	glUniformMatrix4fv(MatrixP, 1, GL_FALSE, &Projection[0][0]);
+}
+
+// glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+// draw squareÇÒ ¶§¸¶´Ù ¾÷µ«ÀÌ µÇ¾î¾ßÇÔ. 
+// hidden drawing¿¡¼­´Â MV, P¸¦ ÀÎÀÚ·Î ¹Þ¾Æ¿Ã °Í.

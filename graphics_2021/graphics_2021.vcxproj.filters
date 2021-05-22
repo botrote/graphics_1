@@ -39,10 +39,10 @@
     <ClCompile Include="Planetary.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="ShaderDrawer.cpp">
+    <ClCompile Include="Drawer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Drawer.cpp">
+    <ClCompile Include="ShaderDrawer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

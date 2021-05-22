@@ -18,9 +18,11 @@ private:
 	glm::mat4 Model;
 	glm::mat4 View;
 	glm::mat4 Projection;
-	glm::mat4 MVP;
+	glm::mat4 MV;
 	GLuint programID;
-	GLuint MatrixID;
+	GLuint MatrixMV;
+	GLuint MatrixP;
+
 	void updateViewing();
 	void drawEnemy();
 	void drawPlayer();
@@ -28,6 +30,7 @@ private:
 	void drawGrid();
 	void drawPlanetaries();
 	void drawUI();
+	void updateMatrix();
 };
 
 
