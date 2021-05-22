@@ -120,9 +120,9 @@ void drawSphere(float radius, const vec4 color, bool mode);
 void drawHiddenSphere(float width,  const vec4 color, GLuint MatrixMV, GLuint MatrixP, mat4 MV, mat4 P);
 void drawHiddenCube(float width, const vec4 color, GLuint MatrixMV, GLuint MatrixP, mat4 MV, mat4 P);
 
-GLint g_uniformColor = -1;
-GLint AmbientProduct, DiffuseProduct, SpecularProduct, LightPosition, Shininess;
+GLint AmbientProduct, DiffuseProduct, SpecularProduct, LightPosition, Shininess, Attenuation;
 vec4 light_position(0.0, 0.0, -1.0, 0.0);
+vec4 light_position2(0.0, 0.0, -1.0, 0.0);
 vec4 light_ambient(0.2, 0.2, 0.2, 1.0);
 vec4 light_diffuse(1.0, 1.0, 1.0, 1.0);
 vec4 light_specular(1.0, 1.0, 1.0, 1.0);
@@ -239,6 +239,7 @@ ShaderDrawer::ShaderDrawer()
 	DiffuseProduct = glGetUniformLocation(programID, "DiffuseProduct");
 	SpecularProduct = glGetUniformLocation(programID, "SpecularProduct");
 	LightPosition = glGetUniformLocation(programID, "LightPosition");
+	Attenuation = glGetUniformLocation(programID, "Attenuation");
 	Shininess = glGetUniformLocation(programID, "Shininess");
 
 	Projection = perspective(radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
@@ -495,55 +496,64 @@ void ShaderDrawer::drawPlanetaries()
 	bool hidden_rendering_mode = gameManager->isHiddenRenderingMode();
 
 	for (Planetary* planetary : gameManager->getPlanetaries())
-	{
+	{	
+		vec3 pos(0.0, 1.0, 0.0);
+
 		Model = mat4(1.0f);
 		Model = translate(Model, vec3(planetary->starPosition.x, 0.5f, -planetary->starPosition.y));
 		Model = rotate(Model, radians(planetary->starAngle), vec3(0.0f, 1.0f, 0.0f));
 		Model = scale(Model, vec3(planetary->starRadius));
-		MV = View * Model;
-
+		mat4 MV_star = View * Model;
+		vec4 star_pos = MV_star * vec4(pos * planetary->starRadius, 1.0);
 		const vec4 color(planetary->starColor.r, planetary->starColor.g, planetary->starColor.b, 0.0f);
-
-		if (hidden_rendering_mode) {
-			drawHiddenSphere(planetary->starRadius, color, MatrixMV, MatrixP, MV, Projection);
-		}
-		else
-		{
-			updateMatrix();
-			drawSphere(planetary->starRadius, color, hidden_rendering_mode);
-		}
 
 		Model = rotate(Model, radians(planetary->planetAngle), vec3(0.0f, 1.0f, 0.0f));
 		Model = translate(Model, vec3(planetary->planetRevoRadius, 0.0f, 0.0f));
 		Model = scale(Model, vec3(planetary->planetRadius));
-		MV = View * Model;
+		mat4 MV_planet = View * Model;
+		vec4 planet_pos = MV_planet * vec4(pos * planetary->planetRadius, 1.0);
 		const vec4 colorPlanet(planetary->planetColor.r, planetary->planetColor.g, planetary->planetColor.b, 0.0f);
-
-		if (hidden_rendering_mode) {
-			drawHiddenSphere(planetary->planetRadius, colorPlanet, MatrixMV, MatrixP, MV, Projection);
-		}
-		else
-		{
-			updateMatrix();
-			drawSphere(planetary->planetRadius, colorPlanet, hidden_rendering_mode);
-		}
 
 		Model = rotate(Model, radians(planetary->satelliteAngle), vec3(0.0f, 1.0f, 0.0f));
 		Model = translate(Model, vec3(0.0f, 0.0f, planetary->satelliteRevoRadius));
 		Model = scale(Model, vec3(planetary->satelliteRadius));
-		MV = View * Model;
-
+		mat4 MV_satellite = View * Model;
+		vec4 satellite_pos = MV_satellite * vec4(pos * planetary->satelliteRadius, 1.0);
 		const vec4 colorSatellite(planetary->satelliteColor.r, planetary->satelliteColor.g, planetary->satelliteColor.b, 0.0f);
+
+		light_position = vec4(0.0, 0.5, 0.0, 0.0) + satellite_pos;
+
 		if (hidden_rendering_mode) {
-			drawHiddenSphere(planetary->satelliteRadius, colorPlanet, MatrixMV, MatrixP, MV, Projection);
+			glUniform1f(Attenuation, get_attenuation(star_pos));
+			drawHiddenSphere(planetary->starRadius, color, MatrixMV, MatrixP, MV_star, Projection);
+
+			glUniform1f(Attenuation, get_attenuation(planet_pos));
+			drawHiddenSphere(planetary->satelliteRadius, colorPlanet, MatrixMV, MatrixP, MV_satellite, Projection);
+
+			glUniform1f(Attenuation, get_attenuation(satellite_pos));
+			drawHiddenSphere(planetary->planetRadius, colorPlanet, MatrixMV, MatrixP, MV_planet, Projection);
 		}
 		else
 		{
-			updateMatrix();
+			glUniformMatrix4fv(MatrixMV, 1, GL_FALSE, &MV_star[0][0]);
+			glUniformMatrix4fv(MatrixP, 1, GL_FALSE, &Projection[0][0]);
+			glUniform1f(Attenuation, get_attenuation(star_pos));
+			drawSphere(planetary->starRadius, color, hidden_rendering_mode);
+
+			glUniformMatrix4fv(MatrixMV, 1, GL_FALSE, &MV_planet[0][0]);
+			glUniformMatrix4fv(MatrixP, 1, GL_FALSE, &Projection[0][0]);
+			glUniform1f(Attenuation, get_attenuation(planet_pos));
+			drawSphere(planetary->planetRadius, colorPlanet, hidden_rendering_mode);
+
+			glUniformMatrix4fv(MatrixMV, 1, GL_FALSE, &MV_satellite[0][0]);
+			glUniformMatrix4fv(MatrixP, 1, GL_FALSE, &Projection[0][0]);
+			glUniform1f(Attenuation, get_attenuation(satellite_pos));
 			drawSphere(planetary->satelliteRadius, colorSatellite, hidden_rendering_mode);
 		}
 
 	}
+
+	light_position = vec4(0.0, 0.0, -1.0, 0.0);
 }
 
 void ShaderDrawer::drawUI()
@@ -736,7 +746,7 @@ void drawSphere(float radius, const vec4 color, bool mode)
 	}
 	else
 	{
-		glDrawElements(GL_LINE_LOOP, numIndicies, GL_UNSIGNED_INT, (void*)(0));
+		glDrawElements(GL_TRIANGLES, numIndicies, GL_UNSIGNED_INT, (void*)(0));
 	}
 
 
@@ -770,6 +780,7 @@ void drawCube(const vec4 color, bool mode)
 	glUniform4fv(SpecularProduct, 1, value_ptr(specular_product));
 	glUniform4fv(LightPosition, 1, value_ptr(light_position));
 	glUniform1f(Shininess, material_shininess);
+	glUniform1f(Attenuation, 1.0);
 
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -788,7 +799,7 @@ void drawCube(const vec4 color, bool mode)
 	}
 	else
 	{
-		glDrawArrays(GL_LINES, 0, 2 * 12);
+		glDrawArrays(GL_TRIANGLES, 0, 2 * 12);
 	}
 
 	glDisableVertexAttribArray(0);
@@ -821,6 +832,7 @@ void drawSquare(const vec4 color, bool isFill)
 	glUniform4fv(SpecularProduct, 1, value_ptr(specular_product));
 	glUniform4fv(LightPosition, 1, value_ptr(light_position));
 	glUniform1f(Shininess, material_shininess);
+	glUniform1f(Attenuation, 1.0);
 
 	// 1rst attribute buffer : vertices
 	glEnableVertexAttribArray(0);
@@ -862,6 +874,7 @@ void drawLine(const vec4 color)
 	glUniform4fv(SpecularProduct, 1, value_ptr(specular_product));
 	glUniform4fv(LightPosition, 1, value_ptr(light_position));
 	glUniform1f(Shininess, material_shininess);
+	glUniform1f(Attenuation, 1.0);
 
 	// 1rst attribute buffer : vertices
 	glEnableVertexAttribArray(0);
@@ -921,6 +934,16 @@ void drawHiddenCube(float width, const vec4 color, GLuint MatrixMV, GLuint Matri
 void ShaderDrawer::updateMatrix() {
 	glUniformMatrix4fv(MatrixMV, 1, GL_FALSE, &MV[0][0]);
 	glUniformMatrix4fv(MatrixP, 1, GL_FALSE, &Projection[0][0]);
+}
+
+float ShaderDrawer::get_attenuation(vec4 pos) {
+	vec4 sub = light_position - pos;
+	float d = length(sub);
+	float dd = length(sub * sub);
+
+	float result = 5 / (1 + d + dd);
+	return result;
+
 }
 
 // glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);

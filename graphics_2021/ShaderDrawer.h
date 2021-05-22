@@ -31,6 +31,8 @@ private:
 	void drawPlanetaries();
 	void drawUI();
 	void updateMatrix();
+	float get_attenuation(glm::vec4 pos);
+	void updateLight();
 };
 
 
