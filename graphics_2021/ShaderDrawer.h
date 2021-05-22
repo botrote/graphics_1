@@ -22,6 +22,7 @@ private:
 	GLuint programID;
 	GLuint MatrixMV;
 	GLuint MatrixP;
+	float LightAngle;
 
 	void updateViewing();
 	void drawEnemy();

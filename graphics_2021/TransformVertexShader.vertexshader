@@ -9,7 +9,7 @@ uniform vec4 AmbientProduct, DiffuseProduct, SpecularProduct;
 uniform mat4 ModelView;
 uniform mat4 Projection;
 uniform vec4 LightPosition;
-//uniform vec4 LightPosition2;
+uniform vec4 LightPosition2;
 uniform float Attenuation;
 uniform float Shininess;
 
@@ -21,9 +21,10 @@ void main(){
 	vec3 pos = (ModelView * vec4(vPosition,1)).xyz;
 
 	vec3 L = normalize( LightPosition.xyz - pos );
-	//vec3 L = normalize( LightPosition.xyz - pos );
+	vec3 L2 = normalize( LightPosition2.xyz - pos );
 	vec3 E = normalize( -pos );
 	vec3 H = normalize( L + E );
+	vec3 H2 = normalize( L2 + E );
 
 	// Transform vertex normal into eye coordinates
 	vec3 N = normalize( ModelView*vec4(vNormal, 0.0) ).xyz;
@@ -40,7 +41,19 @@ void main(){
 	
 	gl_Position = Projection * ModelView * vec4(vPosition, 1);
 	
-	color = ambient + diffuse + specular;
+	vec4 color1 = ambient + diffuse + specular;
+	color1.a = 1.0;
+
+	//Directional Light
+	float Kd2 = max( dot(L2, N), 0.0 );
+	vec4 diffuse2 =  Kd2 * DiffuseProduct;
+
+	float Ks2 = pow( max(dot(N, H2), 0.0), Shininess );
+	vec4 specular2 = Ks2 * SpecularProduct;
+
+	if( dot(L2, N) < 0.0 ) specular2 = vec4(0.0, 0.0, 0.0, 1.0);
+		
+	color = color1 + ambient + diffuse2 + specular2;
 	color.a = 1.0;
 
 }
