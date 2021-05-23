@@ -24,7 +24,8 @@ private:
 	GLuint MatrixP;
 	float LightAngle;
 
-	GLuint planeTexture;
+	GLuint playerTexture;
+	GLuint enemyTexture;
 	GLuint bulletTexture;
 	GLuint itemTexture;
 	GLuint starTexture;
