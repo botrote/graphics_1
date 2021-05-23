@@ -34,6 +34,10 @@ private:
 	GLuint floorTexture;
 	GLuint wallTexture;
 
+	GLuint starNormalTexture;
+	GLuint planetNormalTexture;
+	GLuint satelliteNormalTexture;
+
 	void updateViewing();
 	void drawEnemy();
 	void drawPlayer();

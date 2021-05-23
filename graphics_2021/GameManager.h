@@ -22,6 +22,7 @@ public:
 	bool isHiddenRenderingMode();
 	bool isShadingMode();
 	bool isTextured();
+	bool isNormalMode();
 	void onKeyInput(char key);
 	void onSpecialInput(int key);
 	void onPlayerHit(Type type);
@@ -44,5 +45,6 @@ private:
 	bool hidden_rendering_mode;
 	bool shading_mode;
 	bool textured;
+	bool normalMode;
 };
 

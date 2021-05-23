@@ -26,6 +26,7 @@ GameManager::GameManager()
 	hidden_rendering_mode = false;
 	shading_mode = true;
 	textured = false;
+	normalMode = false;
 
 	srand(time(0));
 
@@ -88,6 +89,9 @@ void GameManager::onKeyInput(char key)
 		break;
 	case 't':
 		textured = !textured;
+		break;
+	case 'n':
+		normalMode = !normalMode;
 		break;
 	}
 	
@@ -301,6 +305,11 @@ bool GameManager::isShadingMode()
 bool GameManager::isTextured()
 {
 	return textured;
+}
+
+bool GameManager::isNormalMode()
+{
+	return normalMode;
 }
 
 std::list<Planetary*> GameManager::getPlanetaries()

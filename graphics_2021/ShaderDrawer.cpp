@@ -208,14 +208,17 @@ void drawCube(GLuint texture, const vec4 color);
 void drawSquare(const vec4 color, bool isFill);
 void drawSquare(GLuint texture, const vec4 color);
 void drawLine(const vec4 color);
-void drawSphere(float radius, const vec4 color, bool mode);
-void drawSphere(float radius, GLuint texture, const vec4 color);
-void drawHiddenSphere(float width,  const vec4 color, GLuint MatrixMV, GLuint MatrixP, mat4 MV, mat4 P);
+void drawSphere(float radius, const vec4 color, bool mode, GLint normalTexture);
+void drawSphere(float radius, GLuint texture, const vec4 color, GLint normalTexture);
+void drawHiddenSphere(float width, const vec4 color, GLuint MatrixMV, GLuint MatrixP, mat4 MV, mat4 P, GLuint normalTexture);
 void drawHiddenCube(float width, const vec4 color, GLuint MatrixMV, GLuint MatrixP, mat4 MV, mat4 P);
 void drawTexturedCube(const vec4 color, GLuint texture);
 
 GLint AmbientProduct, DiffuseProduct, SpecularProduct, LightPosition, LightPosition2, Shininess, Attenuation, Mode;
 GLint FragTextureModeID, TextureID;
+GLint NormalModeID, NormalID;
+GLint defaultNormalTexture;
+
 vec4 light_position(0.0, 0.0, -1.0, 0.0);
 vec4 light_position2(0.0, 0.0, -1.0, 0.0);
 vec4 light_ambient(0.2, 0.2, 0.2, 1.0);
@@ -428,15 +431,21 @@ ShaderDrawer::ShaderDrawer()
 	//planeTexture = loadBMP_custom("3.bmp");
 	//wallTexture = loadBMP_custom("galaxy_1.bmp");
 	//floorTexture = loadBMP_custom("3.bmp");
-	wallTexture = loadBMP_custom("galaxy_2.bmp");
-	floorTexture = loadBMP_custom("galaxy_1.bmp");
-	playerTexture = loadBMP_custom("machine_1.bmp");
-	enemyTexture = loadBMP_custom("machine_2.bmp");
-	itemTexture = loadBMP_custom("diamond.bmp");
-	bulletTexture = loadBMP_custom("electric.bmp");
-	starTexture = loadBMP_custom("sun.bmp");
-	planetTexture = loadBMP_custom("planet.bmp");
-	satteliteTexture = loadBMP_custom("moon.bmp");
+	wallTexture = loadBMP_custom("textures/galaxy_2.bmp");
+	floorTexture = loadBMP_custom("textures/galaxy_1.bmp");
+	playerTexture = loadBMP_custom("textures/machine_1.bmp");
+	enemyTexture = loadBMP_custom("textures/machine_2.bmp");
+	itemTexture = loadBMP_custom("textures/diamond.bmp");
+	bulletTexture = loadBMP_custom("textures/electric.bmp");
+	starTexture = loadBMP_custom("textures/sun.bmp");
+	planetTexture = loadBMP_custom("textures/planet.bmp");
+	satteliteTexture = loadBMP_custom("textures/moon.bmp");
+
+	starNormalTexture = loadBMP_custom("textures/sun_normal.bmp");
+	planetNormalTexture = loadBMP_custom("textures/planet_normal.bmp");
+	satelliteNormalTexture = loadBMP_custom("textures/moon_normal.bmp");
+
+	defaultNormalTexture = starNormalTexture;
 	
 	Projection = perspective(radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
 	LightAngle = 0;
@@ -470,6 +479,8 @@ void ShaderDrawer::drawGame(GameManager* gameManager)
 
 	// Use our shader
 	glUseProgram(programID);
+	glUniform1i(NormalModeID, 0);
+	glUniform1i(FragTextureModeID, 0);
 
 	updateViewing();
 
@@ -497,6 +508,8 @@ void ShaderDrawer::drawGame(GameManager* gameManager)
 
 void ShaderDrawer::drawEnemy()
 {
+	glUniform1i(NormalModeID, 0);
+
 	GameManager* gameManager = GameManager::getInstance();
 	Enemy* enemy = gameManager->getEnemy();
 	bool isTextured = gameManager->isTextured();
@@ -594,6 +607,8 @@ void ShaderDrawer::drawEnemy()
 
 void ShaderDrawer::drawPlayer()
 {
+	glUniform1i(NormalModeID, 0);
+
 	GameManager* gameManager = GameManager::getInstance();
 	Player* player = gameManager->getPlayer();
 
@@ -694,6 +709,8 @@ void ShaderDrawer::drawPlayer()
 
 void ShaderDrawer::drawBullets()
 {
+	glUniform1i(NormalModeID, 0);
+
 	std::list<Bullet*> bullets = GameManager::getInstance()->getBullets();
 	for (Bullet* b : bullets)
 	{
@@ -735,6 +752,8 @@ void ShaderDrawer::drawBullets()
 
 void ShaderDrawer::drawGrid()
 {
+	glUniform1i(NormalModeID, 0);
+
 	Model = mat4(1.0f);
 	Model = translate(Model, vec3(0.0f, -0.5f, 0.0f));
 	Model = scale(Model, vec3(6.0f, 1.0f, 11.0f));
@@ -769,6 +788,8 @@ void ShaderDrawer::drawGrid()
 
 void ShaderDrawer::drawBackground()
 {
+	glUniform1i(NormalModeID, 0);
+
 	const vec4 white(1);
 
 	Model = mat4(1.0f);
@@ -791,6 +812,8 @@ void ShaderDrawer::drawBackground()
 
 void ShaderDrawer::drawPlanetaries()
 {
+	glUniform1i(NormalModeID, 0);
+
 	GameManager* gameManager = GameManager::getInstance();
 	bool hidden_rendering_mode = gameManager->isHiddenRenderingMode();
 
@@ -827,45 +850,45 @@ void ShaderDrawer::drawPlanetaries()
 			glUniformMatrix4fv(MatrixMV, 1, GL_FALSE, &MV_star[0][0]);
 			glUniformMatrix4fv(MatrixP, 1, GL_FALSE, &Projection[0][0]);
 			glUniform1f(Attenuation, get_attenuation(star_pos));
-			drawSphere(planetary->starRadius, starTexture, color);
+			drawSphere(planetary->starRadius, starTexture, color, starNormalTexture);
 
 			glUniformMatrix4fv(MatrixMV, 1, GL_FALSE, &MV_planet[0][0]);
 			glUniformMatrix4fv(MatrixP, 1, GL_FALSE, &Projection[0][0]);
 			glUniform1f(Attenuation, get_attenuation(planet_pos));
-			drawSphere(planetary->planetRadius, planetTexture, colorPlanet);
+			drawSphere(planetary->planetRadius, planetTexture, colorPlanet, planetNormalTexture);
 
 			glUniformMatrix4fv(MatrixMV, 1, GL_FALSE, &MV_satellite[0][0]);
 			glUniformMatrix4fv(MatrixP, 1, GL_FALSE, &Projection[0][0]);
 			glUniform1f(Attenuation, get_attenuation(satellite_pos));
-			drawSphere(planetary->satelliteRadius, satteliteTexture, colorSatellite);
+			drawSphere(planetary->satelliteRadius, satteliteTexture, colorSatellite, satelliteNormalTexture);
 		}
 		else if (hidden_rendering_mode) 
 		{
 			glUniform1f(Attenuation, get_attenuation(star_pos));
-			drawHiddenSphere(planetary->starRadius, color, MatrixMV, MatrixP, MV_star, Projection);
+			drawHiddenSphere(planetary->starRadius, color, MatrixMV, MatrixP, MV_star, Projection, starNormalTexture);
 
 			glUniform1f(Attenuation, get_attenuation(planet_pos));
-			drawHiddenSphere(planetary->satelliteRadius, colorPlanet, MatrixMV, MatrixP, MV_satellite, Projection);
+			drawHiddenSphere(planetary->satelliteRadius, colorPlanet, MatrixMV, MatrixP, MV_satellite, Projection, planetNormalTexture);
 
 			glUniform1f(Attenuation, get_attenuation(satellite_pos));
-			drawHiddenSphere(planetary->planetRadius, colorPlanet, MatrixMV, MatrixP, MV_planet, Projection);
+			drawHiddenSphere(planetary->planetRadius, colorPlanet, MatrixMV, MatrixP, MV_planet, Projection, starNormalTexture);
 		}
 		else
 		{
 			glUniformMatrix4fv(MatrixMV, 1, GL_FALSE, &MV_star[0][0]);
 			glUniformMatrix4fv(MatrixP, 1, GL_FALSE, &Projection[0][0]);
 			glUniform1f(Attenuation, get_attenuation(star_pos));
-			drawSphere(planetary->starRadius, color, hidden_rendering_mode);
+			drawSphere(planetary->starRadius, color, hidden_rendering_mode, starNormalTexture);
 
 			glUniformMatrix4fv(MatrixMV, 1, GL_FALSE, &MV_planet[0][0]);
 			glUniformMatrix4fv(MatrixP, 1, GL_FALSE, &Projection[0][0]);
 			glUniform1f(Attenuation, get_attenuation(planet_pos));
-			drawSphere(planetary->planetRadius, colorPlanet, hidden_rendering_mode);
+			drawSphere(planetary->planetRadius, colorPlanet, hidden_rendering_mode, planetNormalTexture);
 
 			glUniformMatrix4fv(MatrixMV, 1, GL_FALSE, &MV_satellite[0][0]);
 			glUniformMatrix4fv(MatrixP, 1, GL_FALSE, &Projection[0][0]);
 			glUniform1f(Attenuation, get_attenuation(satellite_pos));
-			drawSphere(planetary->satelliteRadius, colorSatellite, hidden_rendering_mode);
+			drawSphere(planetary->satelliteRadius, colorSatellite, hidden_rendering_mode, satelliteNormalTexture);
 		}
 
 	}
@@ -873,6 +896,8 @@ void ShaderDrawer::drawPlanetaries()
 
 void ShaderDrawer::drawUI()
 {
+	glUniform1i(NormalModeID, 0);
+
 	GameManager* gameManager = GameManager::getInstance();
 	Player* player = gameManager->getPlayer();
 
@@ -971,7 +996,7 @@ void ShaderDrawer::drawUI()
 
 }
 
-void drawSphere(float radius, const vec4 color, bool mode)
+void drawSphere(float radius, const vec4 color, bool mode, GLint normalTexture)
 {
 	int slices = 20;
 	int stacks = 20;
@@ -1066,6 +1091,17 @@ void drawSphere(float radius, const vec4 color, bool mode)
 
 	glUniform1i(FragTextureModeID, 0);
 
+	if (GameManager::getInstance()->isNormalMode())
+	{
+		glUniform1i(NormalModeID, 1);
+		glActiveTexture(GL_TEXTURE1);
+		if (normalTexture != -1)
+			glBindTexture(GL_TEXTURE_2D, normalTexture);
+		else
+			glBindTexture(GL_TEXTURE_2D, normalTexture);
+		glUniform1i(NormalID, 1);
+	}
+
 	if (mode == 1)
 	{
 		glDrawElements(GL_TRIANGLES, numIndicies, GL_UNSIGNED_INT, (void*)(0));
@@ -1075,14 +1111,15 @@ void drawSphere(float radius, const vec4 color, bool mode)
 		glDrawElements(GL_LINES, numIndicies, GL_UNSIGNED_INT, (void*)(0));
 	}
 
-
+	
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
+	glUniform1i(NormalID, 0);
 }
 
-void drawSphere(float radius, GLuint texture, const vec4 color)
+void drawSphere(float radius, GLuint texture, const vec4 color, GLint normalTexture)
 {
 	int slices = 20;
 	int stacks = 20;
@@ -1182,11 +1219,21 @@ void drawSphere(float radius, GLuint texture, const vec4 color)
 	// Set our "myTextureSampler" sampler to use Texture Unit 0
 	glUniform1i(TextureID, 0);
 
+	if (GameManager::getInstance()->isNormalMode())
+	{
+		glUniform1i(NormalModeID, 1);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, normalTexture);
+		glUniform1i(NormalID, 1);
+	}
+
 	glDrawElements(GL_TRIANGLES, numIndicies, GL_UNSIGNED_INT, (void*)(0));
 
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	glUniform1i(NormalModeID, 0);
 
 }
 
@@ -1537,21 +1584,21 @@ void drawLine(const vec4 color)
 	glDeleteBuffers(1, &vertexbuffer);
 }
 
-void drawHiddenSphere(float width,const vec4 color, GLuint MatrixMV, GLuint MatrixP, mat4 MV, mat4 Projection)
+void drawHiddenSphere(float width,const vec4 color, GLuint MatrixMV, GLuint MatrixP, mat4 MV, mat4 Projection, GLuint normalTexture)
 {
 	glColorMask(false, false, false, false);
 	glEnable(GL_POLYGON_OFFSET_FILL);
 	glPolygonOffset(width * 0.8, 1);
 	glUniformMatrix4fv(MatrixMV, 1, GL_FALSE, &MV[0][0]);
 	glUniformMatrix4fv(MatrixP, 1, GL_FALSE, &Projection[0][0]);
-	drawSphere(width, color, 1);
+	drawSphere(width, color, 1, normalTexture);
 
 	glDepthMask(GL_FALSE);
 	glColorMask(true, true, true, true);
 	glDisable(GL_POLYGON_OFFSET_FILL);
 	glUniformMatrix4fv(MatrixMV, 1, GL_FALSE, &MV[0][0]);
 	glUniformMatrix4fv(MatrixP, 1, GL_FALSE, &Projection[0][0]);
-	drawSphere(width, color, 0);
+	drawSphere(width, color, 0, normalTexture);
 	glDepthMask(GL_TRUE);
 }
 
@@ -1665,10 +1712,23 @@ float ShaderDrawer::get_attenuation(vec4 pos) {
 }
 
 void ShaderDrawer::updateLight() {
-	LightAngle += 0.01;
-	
+	static bool isRight = true;
+
+	if (isRight)
+		LightAngle += 0.01;
+	else
+		LightAngle -= 0.01;
+
 	if (LightAngle >= 3.14)
+	{
+		LightAngle = 3.14;
+		isRight = false;
+	}
+	else if (LightAngle <= 0)
+	{
 		LightAngle = 0;
+		isRight = true;
+	}
 
 
 	light_position2 = vec4 ( -30*cos(LightAngle)-10, 30*sin(LightAngle), -10.0, 1.0);
@@ -1697,6 +1757,8 @@ void ShaderDrawer::updateShader(bool shading_mode) {
 	Mode = glGetUniformLocation(programID, "Mode");
 
 	FragTextureModeID = glGetUniformLocation(programID, "isTexturedFrag");
+	NormalModeID = glGetUniformLocation(programID, "isNormalMapping");
+	NormalID = glGetUniformLocation(programID, "myNormalSampler");
 
 	glutSwapBuffers();
 }
