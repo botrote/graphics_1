@@ -290,6 +290,12 @@ void ShaderDrawer::drawGame(GameManager* gameManager)
 	drawPlayer();
 	drawEnemy();
 	drawUI();
+	
+	Model = mat4(1.0f);
+	MV = View * Model;
+	updateMatrix();
+	drawCube(vec4(1.0), false);
+
 	glutSwapBuffers();
 }
 

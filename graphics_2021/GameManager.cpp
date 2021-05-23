@@ -24,6 +24,7 @@ GameManager::GameManager()
 	allFail = false;
 	firstViewing = false;
 	hidden_rendering_mode = false;
+	textured = false;
 	srand(time(0));
 
 	Pos plaPos1 = { Random::getRandomFloat(3, 7), Random::getRandomFloat(4, 9) };
@@ -82,6 +83,9 @@ void GameManager::onKeyInput(char key)
 		break;
 	case 'r':
 		hidden_rendering_mode = !hidden_rendering_mode;
+		break;
+	case 't':
+		textured = !textured;
 		break;
 	}
 	
@@ -290,4 +294,9 @@ bool GameManager::isHiddenRenderingMode()
 std::list<Planetary*> GameManager::getPlanetaries()
 {
 	return planetaries;
+}
+
+bool GameManager::isTextured()
+{
+	return textured;
 }
