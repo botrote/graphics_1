@@ -224,6 +224,7 @@ vec4 light_specular(1.0, 1.0, 1.0, 1.0);
 
 vec4 material_specular(1.0, 1.0, 1.0, 1.0);
 float material_shininess = 5.0;
+bool ShadingMode;
 
 static const GLfloat verteces_fillCube[] = {
 
@@ -319,10 +320,10 @@ static const GLfloat uvs_square[] = {
 };
 
 static const GLfloat verteces_square_normal[] = {
-	-6.0f, -0.5f, -11.0f,
-	-6.0f, -0.5f, 11.0f,
-	6.0f, -0.5f, 11.0f,
-	6.0f, -0.5f, -11.0f
+	-1.0f, 1.0f, -1.0f,
+	-1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, -1.0f
 };
 
 static const GLfloat verteces_line[] = {
@@ -439,6 +440,7 @@ ShaderDrawer::ShaderDrawer()
 	
 	Projection = perspective(radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
 	LightAngle = 0;
+	ShadingMode = true;
 	// Camera matrix
 	mat4 View = mat4(1.0f);
 	Model = mat4(1.0f);
@@ -818,7 +820,7 @@ void ShaderDrawer::drawPlanetaries()
 		vec4 satellite_pos = MV_satellite * vec4(pos * planetary->satelliteRadius, 1.0);
 		const vec4 colorSatellite(planetary->satelliteColor.r, planetary->satelliteColor.g, planetary->satelliteColor.b, 0.0f);
 
-		light_position = vec4(0.0, 0.5, 0.0, 0.0) + satellite_pos;
+		light_position = vec4(0.0, 0.8, 0.0, 0.0) + satellite_pos;
 
 		if (gameManager->isTextured())
 		{
@@ -1070,7 +1072,7 @@ void drawSphere(float radius, const vec4 color, bool mode)
 	}
 	else
 	{
-		glDrawElements(GL_TRIANGLES, numIndicies, GL_UNSIGNED_INT, (void*)(0));
+		glDrawElements(GL_LINES, numIndicies, GL_UNSIGNED_INT, (void*)(0));
 	}
 
 
@@ -1394,8 +1396,12 @@ void drawSquare(const vec4 color, bool isFill)
 		0,                  // stride
 		(void*)0            // array buffer offset
 	);
+
 	glEnableVertexAttribArray(2);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	if (ShadingMode)
+		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	else
+		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
 	glVertexAttribPointer(
 		2,                  // attribute. No particular reason for 0, but must match the layout in the shader.
 		3,                  // size
@@ -1661,16 +1667,17 @@ float ShaderDrawer::get_attenuation(vec4 pos) {
 void ShaderDrawer::updateLight() {
 	LightAngle += 0.01;
 	
-	if (LightAngle > 3.14)
+	if (LightAngle >= 3.14)
 		LightAngle = 0;
 
 
-	light_position2 = vec4 ( -30*cos(LightAngle)-10, 30*sin(LightAngle), 10.0, 0.0);
+	light_position2 = vec4 ( -30*cos(LightAngle)-10, 30*sin(LightAngle), -10.0, 1.0);
 
 }
 
 void ShaderDrawer::updateShader(bool shading_mode) {
 
+	ShadingMode = shading_mode;
 	if (shading_mode)
 		programID = LoadShaders("TransformVertexShader.vertexshader", "ColorFragmentShader.fragmentshader");
 	else

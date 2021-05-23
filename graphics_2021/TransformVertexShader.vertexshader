@@ -37,8 +37,8 @@ void main(){
 	float Kd = max( dot(L, N), 0.0 );
 	vec4 diffuse = Attenuation * Kd * DiffuseProduct;
 
-	float Ks = pow( max(dot(N, H), 0.0), Shininess );
-	vec4 specular = Attenuation * Ks * SpecularProduct;
+	float Ks = pow( max(dot(N, H), 0.0), 1 );
+	vec4 specular = 2 * Attenuation * Ks * SpecularProduct;
 
 	if( dot(L, N) < 0.0 ) specular = vec4(0.0, 0.0, 0.0, 1.0);
 	
