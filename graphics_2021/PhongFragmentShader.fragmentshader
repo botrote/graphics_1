@@ -30,11 +30,11 @@ void main()
 	float Kd = max(dot(L, N), 0.0);
 	vec4 diffuse = Attenuation * Kd*DiffuseProduct;
 
-	float Ks = pow(max(dot(N, H), 0.0), 0.1);
-	vec4 specular = Attenuation * Ks*SpecularProduct;
+	float Ks = pow(max(dot(N, H), 0.0), 10);
+	vec4 specular = 10 * Attenuation * Ks*SpecularProduct;
 	
 	// discard the specular highlight if the light¡¯s behind the vertex
-	if( dot(L, N) > 0.0 ) {
+	if( dot(L, N) >= 0.0 ) {
 		specular = vec4(0.0, 0.0, 0.0, 1.0);
 	}
 	
@@ -55,10 +55,10 @@ void main()
 	}
 	
 	float Kd3 = max(dot(L2, N), 0.0);
-	vec4 diffuse3 = Attenuation * Kd3*DiffuseProduct;
+	vec4 diffuse3 = Kd3*DiffuseProduct;
 
-	float Ks3 = pow(max(dot(N, H2), 0.0), 0.1);
-	vec4 specular3 = Attenuation * Ks3*SpecularProduct;
+	float Ks3 = pow(max(dot(N, H2), 0.0), 10);
+	vec4 specular3 = Ks3*SpecularProduct;
 	
 	// discard the specular highlight if the light¡¯s behind the vertex
 	if( dot(L2, N) < 0.0 ) {

@@ -533,7 +533,7 @@ void ShaderDrawer::drawPlanetaries()
 		vec4 satellite_pos = MV_satellite * vec4(pos * planetary->satelliteRadius, 1.0);
 		const vec4 colorSatellite(planetary->satelliteColor.r, planetary->satelliteColor.g, planetary->satelliteColor.b, 0.0f);
 
-		light_position = vec4(0.0, 0.5, 0.0, 0.0) + satellite_pos;
+		light_position = vec4(0.0, 0.8, 0.0, 0.0) + satellite_pos;
 
 		if (hidden_rendering_mode) {
 			glUniform1f(Attenuation, get_attenuation(star_pos));
@@ -758,7 +758,7 @@ void drawSphere(float radius, const vec4 color, bool mode)
 	}
 	else
 	{
-		glDrawElements(GL_TRIANGLES, numIndicies, GL_UNSIGNED_INT, (void*)(0));
+		glDrawElements(GL_LINES, numIndicies, GL_UNSIGNED_INT, (void*)(0));
 	}
 
 
@@ -999,7 +999,7 @@ float ShaderDrawer::get_attenuation(vec4 pos) {
 void ShaderDrawer::updateLight() {
 	LightAngle += 0.01;
 	
-	if (LightAngle > 3.14)
+	if (LightAngle >= 3.14)
 		LightAngle = 0;
 
 
