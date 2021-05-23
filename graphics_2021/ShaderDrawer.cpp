@@ -208,6 +208,7 @@ GLuint loadBMP_custom(const char* imagepath) {
 
 void drawCube(const vec4 color, bool mode);
 void drawSquare(const vec4 color, bool isFill);
+void drawTexturedSquare(const vec4 color, GLuint texture);
 void drawLine(const vec4 color);
 void drawSphere(float radius, const vec4 color, bool mode);
 void drawHiddenSphere(float width,  const vec4 color, GLuint MatrixMV, GLuint MatrixP, mat4 MV, mat4 P);
@@ -305,12 +306,58 @@ static const GLfloat verteces_square[] = {
 	1.0f, 0.0f, -1.0f
 };
 
+static const GLfloat uvs_square[] = {
+	1.0f, 1.0f - 0.0f,
+	0.0f, 1.0f - 0.0f,
+	0.0f, 1.0f - 1.0f,
+	1.0f, 1.0f - 1.0f
+};
+
 static const GLfloat verteces_line[] = {
 	-1.0f, 0.0f, 0.0f,
 	1.0f, 0.0f, 0.0f,
 };
 
-static const GLfloat g_uv_buffer_data[] = {
+static const GLfloat verteces_triangleCube[] = {
+		-1.0f,-1.0f,-1.0f,
+		-1.0f,-1.0f, 1.0f,
+		-1.0f, 1.0f, 1.0f,
+		 1.0f, 1.0f,-1.0f,
+		-1.0f,-1.0f,-1.0f,
+		-1.0f, 1.0f,-1.0f,
+		 1.0f,-1.0f, 1.0f,
+		-1.0f,-1.0f,-1.0f,
+		 1.0f,-1.0f,-1.0f,
+		 1.0f, 1.0f,-1.0f,
+		 1.0f,-1.0f,-1.0f,
+		-1.0f,-1.0f,-1.0f,
+		-1.0f,-1.0f,-1.0f,
+		-1.0f, 1.0f, 1.0f,
+		-1.0f, 1.0f,-1.0f,
+		 1.0f,-1.0f, 1.0f,
+		-1.0f,-1.0f, 1.0f,
+		-1.0f,-1.0f,-1.0f,
+		-1.0f, 1.0f, 1.0f,
+		-1.0f,-1.0f, 1.0f,
+		 1.0f,-1.0f, 1.0f,
+		 1.0f, 1.0f, 1.0f,
+		 1.0f,-1.0f,-1.0f,
+		 1.0f, 1.0f,-1.0f,
+		 1.0f,-1.0f,-1.0f,
+		 1.0f, 1.0f, 1.0f,
+		 1.0f,-1.0f, 1.0f,
+		 1.0f, 1.0f, 1.0f,
+		 1.0f, 1.0f,-1.0f,
+		-1.0f, 1.0f,-1.0f,
+		 1.0f, 1.0f, 1.0f,
+		-1.0f, 1.0f,-1.0f,
+		-1.0f, 1.0f, 1.0f,
+		 1.0f, 1.0f, 1.0f,
+		-1.0f, 1.0f, 1.0f,
+		 1.0f,-1.0f, 1.0f
+};
+
+static const GLfloat uvs_triangleCube[] = {
 	0.000059f, 1.0f - 0.000004f,
 	0.000103f, 1.0f - 0.336048f,
 	0.335973f, 1.0f - 0.335903f,
@@ -380,6 +427,8 @@ ShaderDrawer::ShaderDrawer()
 
 	planeTexture = loadBMP_custom("uvtemplate.bmp");
 	//planeTexture = loadBMP_custom("3.bmp");
+	wallTexture = loadBMP_custom("galaxy_1.bmp");
+	floorTexture = loadBMP_custom("galaxy_2.bmp");
 	//glActiveTexture(GL_TEXTURE0);
 	//glBindTexture(GL_TEXTURE_2D, planeTexture);
 
@@ -418,6 +467,7 @@ void ShaderDrawer::drawGame(GameManager* gameManager)
 
 
 	drawGrid();
+	drawBackground();
 	drawBullets();
 	drawPlanetaries();
 	drawPlayer();
@@ -429,8 +479,16 @@ void ShaderDrawer::drawGame(GameManager* gameManager)
 	Model = translate(mat4(1.0f), vec3(0, 1.0f, 0));
 	MV = View * Model;
 	updateMatrix();
-	drawTexturedCube(glm::vec4(0, 1, 0, 1), planeTexture);
-	//drawCube(glm::vec4(1, 0, 0, 1), true);
+
+
+	if (gameManager->isTextured())
+	{
+		drawTexturedCube(glm::vec4(1, 1, 1, 1), planeTexture);
+	}
+	else
+	{
+		drawCube(glm::vec4(1, 0, 0, 1), true);
+	}
 	glutSwapBuffers();
 }
 
@@ -531,6 +589,7 @@ void ShaderDrawer::drawPlayer()
 	{
 		updateMatrix();
 		drawCube(color, false); //몸통
+		//drawTexturedCube(color, planeTexture); //몸통
 	}
 
 	Model = translate(Model, vec3(0.0f, 0.0f, -1.0f));
@@ -542,7 +601,7 @@ void ShaderDrawer::drawPlayer()
 	else
 	{
 		updateMatrix();
-		drawCube(color, false); //몸통
+		drawCube(color, false);
 	}
 
 	Model = translate(bodyModel, vec3(0.9f, 0.0f, 0.9f));
@@ -616,7 +675,7 @@ void ShaderDrawer::drawGrid()
 	const vec4 red(1.0f, 0.0f, 0.0f, 0.0f);
 
 	updateMatrix();
-	drawSquare( white, true);
+	//drawSquare( white, true);
 
 	for (int i = 0; i < 40; i++)
 	{
@@ -637,6 +696,28 @@ void ShaderDrawer::drawGrid()
 		drawLine(blue);
 	}
 
+}
+
+void ShaderDrawer::drawBackground()
+{
+	const vec4 white(1);
+
+	Model = mat4(1.0f);
+	Model = translate(Model, vec3(0.0f, -1.0f, 0.0f));
+	Model = scale(Model, vec3(20.0f, 1.0f, 20.0f));
+	MV = View * Model;
+	updateMatrix();
+
+	drawTexturedSquare(white, floorTexture);
+
+	Model = mat4(1.0f);
+	Model = translate(Model, vec3(0.0f, 0.0f, -20.0f));
+	Model = rotate(Model, radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
+	Model = scale(Model, vec3(20.0f, 1.0f, 20.0f));
+	MV = View * Model;
+	updateMatrix();
+
+	drawTexturedSquare(white, wallTexture);
 }
 
 void ShaderDrawer::drawPlanetaries()
@@ -898,7 +979,6 @@ void drawSphere(float radius, const vec4 color, bool mode)
 
 void drawCube(const vec4 color, bool mode)
 {
-
 	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -993,6 +1073,68 @@ void drawSquare(const vec4 color, bool isFill)
 	glDeleteBuffers(1, &vertexbuffer);
 }
 
+void drawTexturedSquare(const vec4 color, GLuint texture)
+{
+	GLuint vertexbuffer;
+	glGenBuffers(1, &vertexbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_square), verteces_square, GL_STATIC_DRAW);
+
+	GLuint uvbuffer;
+	glGenBuffers(1, &uvbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(uvs_square), uvs_square, GL_STATIC_DRAW);
+
+	vec4 material_diffuse(color.r * 0.8, color.g * 0.8, color.b * 0.8, 1.0);
+
+	vec4 ambient_product = light_ambient * color;
+	vec4 diffuse_product = light_diffuse * color;
+	vec4 specular_product = light_specular * material_specular;
+
+	glUniform4fv(AmbientProduct, 1, value_ptr(ambient_product));
+	glUniform4fv(DiffuseProduct, 1, value_ptr(diffuse_product));
+	glUniform4fv(SpecularProduct, 1, value_ptr(specular_product));
+	glUniform4fv(LightPosition, 1, value_ptr(light_position));
+	glUniform1f(Shininess, material_shininess);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	// Set our "myTextureSampler" sampler to use Texture Unit 0
+	glUniform1i(TextureID, 0);
+
+	// 1rst attribute buffer : vertices
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glVertexAttribPointer(
+		0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+	);
+
+	// 2nd attribute buffer : UVs
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	glVertexAttribPointer(
+		1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
+		2,                                // size : U+V => 2
+		GL_FLOAT,                         // type
+		GL_FALSE,                         // normalized?
+		0,                                // stride
+		(void*)0                          // array buffer offset
+	);
+
+
+	glDrawArrays(GL_QUADS, 0, 15);
+
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glDeleteBuffers(1, &vertexbuffer);
+	glDeleteBuffers(1, &uvbuffer);
+}
+
 void drawLine(const vec4 color)
 {
 	GLuint vertexbuffer;
@@ -1077,44 +1219,7 @@ void ShaderDrawer::updateMatrix() {
 // draw square할 때마다 업뎃이 되어야함. 
 // hidden drawing에서는 MV, P를 인자로 받아올 것.
 
-static const GLfloat g_vertex_buffer_data[] = {
-		-1.0f,-1.0f,-1.0f,
-		-1.0f,-1.0f, 1.0f,
-		-1.0f, 1.0f, 1.0f,
-		 1.0f, 1.0f,-1.0f,
-		-1.0f,-1.0f,-1.0f,
-		-1.0f, 1.0f,-1.0f,
-		 1.0f,-1.0f, 1.0f,
-		-1.0f,-1.0f,-1.0f,
-		 1.0f,-1.0f,-1.0f,
-		 1.0f, 1.0f,-1.0f,
-		 1.0f,-1.0f,-1.0f,
-		-1.0f,-1.0f,-1.0f,
-		-1.0f,-1.0f,-1.0f,
-		-1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f,-1.0f,
-		 1.0f,-1.0f, 1.0f,
-		-1.0f,-1.0f, 1.0f,
-		-1.0f,-1.0f,-1.0f,
-		-1.0f, 1.0f, 1.0f,
-		-1.0f,-1.0f, 1.0f,
-		 1.0f,-1.0f, 1.0f,
-		 1.0f, 1.0f, 1.0f,
-		 1.0f,-1.0f,-1.0f,
-		 1.0f, 1.0f,-1.0f,
-		 1.0f,-1.0f,-1.0f,
-		 1.0f, 1.0f, 1.0f,
-		 1.0f,-1.0f, 1.0f,
-		 1.0f, 1.0f, 1.0f,
-		 1.0f, 1.0f,-1.0f,
-		-1.0f, 1.0f,-1.0f,
-		 1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f,-1.0f,
-		-1.0f, 1.0f, 1.0f,
-		 1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f, 1.0f,
-		 1.0f,-1.0f, 1.0f
-};
+
 
 // Two UV coordinatesfor each vertex. They were created with Blender.
 
@@ -1124,12 +1229,12 @@ void drawTexturedCube(const vec4 color, GLuint texture)
 	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_triangleCube), verteces_triangleCube, GL_STATIC_DRAW);
 
 	GLuint uvbuffer;
 	glGenBuffers(1, &uvbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(g_uv_buffer_data), g_uv_buffer_data, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(uvs_triangleCube), uvs_triangleCube, GL_STATIC_DRAW);
 
 
 	

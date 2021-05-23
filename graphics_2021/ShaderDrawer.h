@@ -29,12 +29,15 @@ private:
 	GLuint starTexture;
 	GLuint planetTexture;
 	GLuint satteliteTexture;
+	GLuint floorTexture;
+	GLuint wallTexture;
 
 	void updateViewing();
 	void drawEnemy();
 	void drawPlayer();
 	void drawBullets();
 	void drawGrid();
+	void drawBackground();
 	void drawPlanetaries();
 	void drawUI();
 	void updateMatrix();
