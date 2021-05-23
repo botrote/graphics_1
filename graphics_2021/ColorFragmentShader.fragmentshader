@@ -1,9 +1,17 @@
 #version 330 core
 
 in vec4 color;
+in vec2 UV;
 
 layout (location=0) out vec4 out_color;
 
+uniform bool isTexturedFrag;
+uniform sampler2D myTextureSampler;
+
 void main(){
-	out_color = color;
+	if(isTexturedFrag)
+		out_color = color * texture( myTextureSampler, UV );
+	else
+		out_color = color;
+
 }

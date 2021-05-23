@@ -24,6 +24,15 @@ private:
 	GLuint MatrixP;
 	float LightAngle;
 
+	GLuint planeTexture;
+	GLuint bulletTexture;
+	GLuint itemTexture;
+	GLuint starTexture;
+	GLuint planetTexture;
+	GLuint satteliteTexture;
+	GLuint floorTexture;
+	GLuint wallTexture;
+
 	void updateViewing();
 	void drawEnemy();
 	void drawPlayer();

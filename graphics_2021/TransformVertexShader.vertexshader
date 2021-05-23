@@ -2,8 +2,11 @@
 
 // Input vertex data, different for all executions of this shader.
 layout(location = 0) in vec3 vPosition;
+layout(location = 1) in vec2 vertexUV;
 layout(location = 2) in vec3 vNormal;
+
 out vec4 color;
+out vec2 UV;
 
 uniform vec4 AmbientProduct, DiffuseProduct, SpecularProduct;
 uniform mat4 ModelView;
@@ -12,6 +15,7 @@ uniform vec4 LightPosition;
 uniform vec4 LightPosition2;
 uniform float Attenuation;
 uniform float Shininess;
+uniform bool isTexturedVertex;
 
 void main(){	
 
@@ -55,6 +59,12 @@ void main(){
 		
 	color = color1 + ambient + diffuse2 + specular2;
 	color.a = 1.0;
+
+	if(isTexturedVertex)
+		UV = vertexUV;
+	else
+		UV = vec2(0, 0);
+	//UV = vec2(0, 0);
 
 }
 

@@ -113,14 +113,106 @@ GLuint LoadShaders(const char* vertex_file_path, const char* fragment_file_path)
 
 	return ProgramID;
 }
+
+GLuint loadBMP_custom(const char* imagepath) {
+
+	printf("Reading image %s\n", imagepath);
+
+	// Data read from the header of the BMP file
+	unsigned char header[54];
+	unsigned int dataPos;
+	unsigned int imageSize;
+	unsigned int width, height;
+	// Actual RGB data
+	unsigned char* data;
+
+	// Open the file
+	FILE* file;
+	fopen_s(&file, imagepath, "rb");
+
+	if (!file) {
+		printf("%s could not be opened. Are you in the right directory ? Don't forget to read the FAQ !\n", imagepath);
+		getchar();
+		return 0;
+	}
+
+	// Read the header, i.e. the 54 first bytes
+
+	// If less than 54 bytes are read, problem
+	if (fread(header, 1, 54, file) != 54) {
+		printf("Not a correct BMP file\n");
+		fclose(file);
+		return 0;
+	}
+	// A BMP files always begins with "BM"
+	if (header[0] != 'B' || header[1] != 'M') {
+		printf("Not a correct BMP file\n");
+		fclose(file);
+		return 0;
+	}
+	// Make sure this is a 24bpp file
+	if (*(int*)&(header[0x1E]) != 0) { printf("Not a correct BMP file\n");    fclose(file); return 0; }
+	if (*(int*)&(header[0x1C]) != 24) { printf("Not a correct BMP file\n");    fclose(file); return 0; }
+
+	// Read the information about the image
+	dataPos = *(int*)&(header[0x0A]);
+	imageSize = *(int*)&(header[0x22]);
+	width = *(int*)&(header[0x12]);
+	height = *(int*)&(header[0x16]);
+
+	// Some BMP files are misformatted, guess missing information
+	if (imageSize == 0)    imageSize = width * height * 3; // 3 : one byte for each Red, Green and Blue component
+	if (dataPos == 0)      dataPos = 54; // The BMP header is done that way
+
+	// Create a buffer
+	data = new unsigned char[imageSize];
+
+	// Read the actual data from the file into the buffer
+	fread(data, 1, imageSize, file);
+
+	// Everything is in memory now, the file can be closed.
+	fclose(file);
+
+	// Create one OpenGL texture
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, textureID);
+
+	// Give the image to OpenGL
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_BGR, GL_UNSIGNED_BYTE, data);
+
+	// OpenGL has now copied the data. Free our own version
+	delete[] data;
+
+	// Poor filtering, or ...
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); 
+
+	// ... nice trilinear filtering ...
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	// ... which requires mipmaps. Generate them automatically.
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	// Return the ID of the texture we just created
+	printf("load success: ID is %d\n", textureID);
+	return textureID;
+}
+
 void drawCube(const vec4 color, bool mode);
 void drawSquare(const vec4 color, bool isFill);
 void drawLine(const vec4 color);
 void drawSphere(float radius, const vec4 color, bool mode);
 void drawHiddenSphere(float width,  const vec4 color, GLuint MatrixMV, GLuint MatrixP, mat4 MV, mat4 P);
 void drawHiddenCube(float width, const vec4 color, GLuint MatrixMV, GLuint MatrixP, mat4 MV, mat4 P);
+void drawTexturedCube(const vec4 color, GLuint texture);
 
 GLint AmbientProduct, DiffuseProduct, SpecularProduct, LightPosition, LightPosition2, Shininess, Attenuation, Mode;
+GLint VertexTextureModeID, FragTextureModeID, TextureID;
 vec4 light_position(0.0, 0.0, -1.0, 0.0);
 vec4 light_position2(0.0, 0.0, -1.0, 0.0);
 vec4 light_ambient(0.2, 0.2, 0.2, 1.0);
@@ -207,8 +299,12 @@ static const GLfloat verteces_square[] = {
 	-1.0f, 0.0f, -1.0f,
 	-1.0f, 0.0f, 1.0f,
 	1.0f, 0.0f, 1.0f,
-	1.0f, 0.0f, -1.0f
+
+	1.0f, 0.0f, -1.0f,
+	-1.0f, 0.0f, -1.0f,
+	1.0f, 0.0f, 1.0f
 }; 
+
 static const GLfloat verteces_square_normal[] = {
 	-6.0f, -0.5f, -11.0f,
 	-6.0f, -0.5f, 11.0f,
@@ -220,6 +316,85 @@ static const GLfloat verteces_line[] = {
 	-1.0f, 0.0f, 0.0f,
 	1.0f, 0.0f, 0.0f,
 };
+
+static const GLfloat verteces_triangleCube[] = {
+		-1.0f,-1.0f,-1.0f,
+		-1.0f,-1.0f, 1.0f,
+		-1.0f, 1.0f, 1.0f,
+		 1.0f, 1.0f,-1.0f,
+		-1.0f,-1.0f,-1.0f,
+		-1.0f, 1.0f,-1.0f,
+		 1.0f,-1.0f, 1.0f,
+		-1.0f,-1.0f,-1.0f,
+		 1.0f,-1.0f,-1.0f,
+		 1.0f, 1.0f,-1.0f,
+		 1.0f,-1.0f,-1.0f,
+		-1.0f,-1.0f,-1.0f,
+		-1.0f,-1.0f,-1.0f,
+		-1.0f, 1.0f, 1.0f,
+		-1.0f, 1.0f,-1.0f,
+		 1.0f,-1.0f, 1.0f,
+		-1.0f,-1.0f, 1.0f,
+		-1.0f,-1.0f,-1.0f,
+		-1.0f, 1.0f, 1.0f,
+		-1.0f,-1.0f, 1.0f,
+		 1.0f,-1.0f, 1.0f,
+		 1.0f, 1.0f, 1.0f,
+		 1.0f,-1.0f,-1.0f,
+		 1.0f, 1.0f,-1.0f,
+		 1.0f,-1.0f,-1.0f,
+		 1.0f, 1.0f, 1.0f,
+		 1.0f,-1.0f, 1.0f,
+		 1.0f, 1.0f, 1.0f,
+		 1.0f, 1.0f,-1.0f,
+		-1.0f, 1.0f,-1.0f,
+		 1.0f, 1.0f, 1.0f,
+		-1.0f, 1.0f,-1.0f,
+		-1.0f, 1.0f, 1.0f,
+		 1.0f, 1.0f, 1.0f,
+		-1.0f, 1.0f, 1.0f,
+		 1.0f,-1.0f, 1.0f
+};
+
+static const GLfloat uvs_triangleCube[] = {
+	0.000059f, 1.0f - 0.000004f,
+	0.000103f, 1.0f - 0.336048f,
+	0.335973f, 1.0f - 0.335903f,
+	1.000023f, 1.0f - 0.000013f,
+	0.667979f, 1.0f - 0.335851f,
+	0.999958f, 1.0f - 0.336064f,
+	0.667979f, 1.0f - 0.335851f,
+	0.336024f, 1.0f - 0.671877f,
+	0.667969f, 1.0f - 0.671889f,
+	1.000023f, 1.0f - 0.000013f,
+	0.668104f, 1.0f - 0.000013f,
+	0.667979f, 1.0f - 0.335851f,
+	0.000059f, 1.0f - 0.000004f,
+	0.335973f, 1.0f - 0.335903f,
+	0.336098f, 1.0f - 0.000071f,
+	0.667979f, 1.0f - 0.335851f,
+	0.335973f, 1.0f - 0.335903f,
+	0.336024f, 1.0f - 0.671877f,
+	1.000004f, 1.0f - 0.671847f,
+	0.999958f, 1.0f - 0.336064f,
+	0.667979f, 1.0f - 0.335851f,
+	0.668104f, 1.0f - 0.000013f,
+	0.335973f, 1.0f - 0.335903f,
+	0.667979f, 1.0f - 0.335851f,
+	0.335973f, 1.0f - 0.335903f,
+	0.668104f, 1.0f - 0.000013f,
+	0.336098f, 1.0f - 0.000071f,
+	0.000103f, 1.0f - 0.336048f,
+	0.000004f, 1.0f - 0.671870f,
+	0.336024f, 1.0f - 0.671877f,
+	0.000103f, 1.0f - 0.336048f,
+	0.336024f, 1.0f - 0.671877f,
+	0.335973f, 1.0f - 0.335903f,
+	0.667969f, 1.0f - 0.671889f,
+	1.000004f, 1.0f - 0.671847f,
+	0.667979f, 1.0f - 0.335851f
+};
+
 
 void ShaderDrawer::changeSize(int w, int h)
 {
@@ -234,20 +409,12 @@ void ShaderDrawer::changeSize(int w, int h)
 
 ShaderDrawer::ShaderDrawer()
 {
-	programID = LoadShaders("TransformVertexShader.vertexshader", "ColorFragmentShader.fragmentshader");
-	//g_uniformColor = glGetUniformLocation(programID, "color");
-	MatrixMV = glGetUniformLocation(programID, "ModelView");
-	MatrixP = glGetUniformLocation(programID, "Projection");
+	updateShader(true);
 
-	// Initialize shader lighting parameters
-	AmbientProduct = glGetUniformLocation(programID, "AmbientProduct");
-	DiffuseProduct = glGetUniformLocation(programID, "DiffuseProduct");
-	SpecularProduct = glGetUniformLocation(programID, "SpecularProduct");
-	LightPosition = glGetUniformLocation(programID, "LightPosition");
-	LightPosition2 = glGetUniformLocation(programID, "LightPosition2");
-	Attenuation = glGetUniformLocation(programID, "Attenuation");
-	Shininess = glGetUniformLocation(programID, "Shininess");
-	Mode = glGetUniformLocation(programID, "Mode");
+	//planeTexture = loadBMP_custom("uvtemplate.bmp");
+	//planeTexture = loadBMP_custom("3.bmp");
+	//wallTexture = loadBMP_custom("galaxy_1.bmp");
+	floorTexture = loadBMP_custom("galaxy_2.bmp");
 
 	Projection = perspective(radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
 	LightAngle = 0;
@@ -290,6 +457,15 @@ void ShaderDrawer::drawGame(GameManager* gameManager)
 	drawPlayer();
 	drawEnemy();
 	drawUI();
+
+	Model = mat4(1.0f);
+	Model = translate(Model, vec3(0.5f, 1.0f, -10.0f));
+	MV = View * Model;
+	updateMatrix();
+	drawCube(vec4(1.0f, 0.0f, 0.0f, 1.0f), true);
+	//drawSquare(vec4(1.0f), true);
+	//drawTexturedCube(vec4(1.0f), floorTexture);
+
 	glutSwapBuffers();
 }
 
@@ -453,15 +629,15 @@ void ShaderDrawer::drawBullets()
 			Model = rotate(Model, radians(45.0f), vec3(0.0f, 1.0f, 0.0f));
 			MV = View * Model;
 			updateMatrix();
-			drawCube(color, true);
+			drawCube(color, false);
 			//drawSphere(1, color, true);
 		}
 		else
 		{
 			MV = View * Model;
 			updateMatrix();
-			drawCube(color, true);
-			//drawSphere(1, color, true);
+			//drawCube(color, false);
+			drawSphere(1, color, true);
 		}
 	}
 }
@@ -774,15 +950,21 @@ void drawCube(const vec4 color, bool mode)
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 
 	if (mode)
-		glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_fillCube), verteces_fillCube, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_triangleCube), verteces_triangleCube, GL_STATIC_DRAW);
 	else
 		glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_lineCube), verteces_lineCube, GL_STATIC_DRAW);
+
+	GLuint uvbuffer;
+	glGenBuffers(1, &uvbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(uvs_triangleCube), uvs_triangleCube, GL_STATIC_DRAW);
 	
 	GLuint vertexbuffer2;
 	glGenBuffers(1, &vertexbuffer2);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
+
 	if (mode)
-		glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_fillCube), verteces_fillCube, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_triangleCube), verteces_triangleCube, GL_STATIC_DRAW);
 	else
 		glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_lineCube), verteces_lineCube, GL_STATIC_DRAW);
 
@@ -799,6 +981,9 @@ void drawCube(const vec4 color, bool mode)
 	glUniform1f(Shininess, material_shininess);
 	glUniform1i(Mode, 0);
 
+	glUniform1i(FragTextureModeID, 0);
+	glUniform1i(VertexTextureModeID, 0);
+
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glVertexAttribPointer(
@@ -809,6 +994,19 @@ void drawCube(const vec4 color, bool mode)
 		0,                  // stride
 		(void*)0            // array buffer offset
 	);
+
+	// 2nd attribute buffer : UVs
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	glVertexAttribPointer(
+		1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
+		2,                                // size : U+V => 2
+		GL_FLOAT,                         // type
+		GL_FALSE,                         // normalized?
+		0,                                // stride
+		(void*)0                          // array buffer offset
+	);
+
 	glEnableVertexAttribArray(2);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
 	glVertexAttribPointer(
@@ -822,7 +1020,7 @@ void drawCube(const vec4 color, bool mode)
 
 	if (mode == true)
 	{
-		glDrawArrays(GL_QUADS, 0, 4 * 6);
+		glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
 	}
 	else
 	{
@@ -830,7 +1028,9 @@ void drawCube(const vec4 color, bool mode)
 	}
 
 	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(2);
 	glDeleteBuffers(1, &vertexbuffer);
+	glDeleteBuffers(1, &vertexbuffer2);
 }
 
 void drawSquare(const vec4 color, bool isFill)
@@ -891,7 +1091,7 @@ void drawSquare(const vec4 color, bool isFill)
 	glUniform1i(Mode, 0);
 
 	if (isFill)
-		glDrawArrays(GL_QUADS, 0, 15);
+		glDrawArrays(GL_TRIANGLES, 0, 2 * 3);
 	else
 		glDrawArrays(GL_LINE_LOOP, 0, 4);
 
@@ -975,6 +1175,83 @@ void drawHiddenCube(float width, const vec4 color, GLuint MatrixMV, GLuint Matri
 	glDepthMask(GL_TRUE);
 }
 
+void drawTexturedCube(const vec4 color, GLuint texture)
+{
+	GLuint vertexbuffer;
+	glGenBuffers(1, &vertexbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_triangleCube), verteces_triangleCube, GL_STATIC_DRAW);
+
+	GLuint uvbuffer;
+	glGenBuffers(1, &uvbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(uvs_triangleCube), uvs_triangleCube, GL_STATIC_DRAW);
+
+	// 1rst attribute buffer : vertices
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glVertexAttribPointer(
+		0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+	);
+
+	// 2nd attribute buffer : UVs
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	glVertexAttribPointer(
+		1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
+		2,                                // size : U+V => 2
+		GL_FLOAT,                         // type
+		GL_FALSE,                         // normalized?
+		0,                                // stride
+		(void*)0                          // array buffer offset
+	);
+
+	glEnableVertexAttribArray(2);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glVertexAttribPointer(
+		2,                  // attribute. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+	);
+
+	vec4 material_diffuse(color.r * 0.8, color.g * 0.8, color.b * 0.8, 1.0);
+
+	vec4 ambient_product = light_ambient * color;
+	vec4 diffuse_product = light_diffuse * material_diffuse;
+	vec4 specular_product = light_specular * material_specular;
+
+	glUniform4fv(AmbientProduct, 1, value_ptr(ambient_product));
+	glUniform4fv(DiffuseProduct, 1, value_ptr(diffuse_product));
+	glUniform4fv(SpecularProduct, 1, value_ptr(specular_product));
+	glUniform4fv(LightPosition, 1, value_ptr(light_position));
+	glUniform1f(Shininess, material_shininess);
+
+	glUniform1i(FragTextureModeID, 1);
+	glUniform1i(VertexTextureModeID, 1);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	// Set our "myTextureSampler" sampler to use Texture Unit 0
+	//glUniform1i(TextureID, 0);
+
+	// Draw the triangle !
+	glDrawArrays(GL_TRIANGLES, 0, 12 * 3); // 12*3 indices starting at 0 -> 12 triangles
+
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glDeleteBuffers(1, &vertexbuffer);
+	glDeleteBuffers(1, &uvbuffer);
+
+}
+
 void ShaderDrawer::updateMatrix() {
 	glUniformMatrix4fv(MatrixMV, 1, GL_FALSE, &MV[0][0]);
 	glUniformMatrix4fv(MatrixP, 1, GL_FALSE, &Projection[0][0]);
@@ -1020,6 +1297,11 @@ void ShaderDrawer::updateShader(bool shading_mode) {
 	Attenuation = glGetUniformLocation(programID, "Attenuation");
 	Shininess = glGetUniformLocation(programID, "Shininess");
 	Mode = glGetUniformLocation(programID, "Mode");
+
+	VertexTextureModeID = glGetUniformLocation(programID, "isTexturedVertex");
+	FragTextureModeID = glGetUniformLocation(programID, "isTexturedFrag");
+
+	glutSwapBuffers();
 }
 
 // glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
