@@ -38,6 +38,7 @@ private:
 	void drawPlayer();
 	void drawBullets();
 	void drawGrid();
+	void drawBackground();
 	void drawPlanetaries();
 	void drawUI();
 	void updateMatrix();

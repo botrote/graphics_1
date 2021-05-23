@@ -15,7 +15,6 @@ uniform vec4 LightPosition;
 uniform vec4 LightPosition2;
 uniform float Attenuation;
 uniform float Shininess;
-uniform bool isTexturedVertex;
 
 void main(){	
 
@@ -60,11 +59,9 @@ void main(){
 	color = color1 + ambient + diffuse2 + specular2;
 	color.a = 1.0;
 
-	if(isTexturedVertex)
-		UV = vertexUV;
-	else
-		UV = vec2(0, 0);
-	//UV = vec2(0, 0);
+
+	UV = vertexUV;
+
 
 }
 

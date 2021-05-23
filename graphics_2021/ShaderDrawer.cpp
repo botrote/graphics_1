@@ -204,7 +204,9 @@ GLuint loadBMP_custom(const char* imagepath) {
 }
 
 void drawCube(const vec4 color, bool mode);
+void drawCube(GLuint texture, const vec4 color);
 void drawSquare(const vec4 color, bool isFill);
+void drawSquare(GLuint texture, const vec4 color);
 void drawLine(const vec4 color);
 void drawSphere(float radius, const vec4 color, bool mode);
 void drawHiddenSphere(float width,  const vec4 color, GLuint MatrixMV, GLuint MatrixP, mat4 MV, mat4 P);
@@ -212,7 +214,7 @@ void drawHiddenCube(float width, const vec4 color, GLuint MatrixMV, GLuint Matri
 void drawTexturedCube(const vec4 color, GLuint texture);
 
 GLint AmbientProduct, DiffuseProduct, SpecularProduct, LightPosition, LightPosition2, Shininess, Attenuation, Mode;
-GLint VertexTextureModeID, FragTextureModeID, TextureID;
+GLint FragTextureModeID, TextureID;
 vec4 light_position(0.0, 0.0, -1.0, 0.0);
 vec4 light_position2(0.0, 0.0, -1.0, 0.0);
 vec4 light_ambient(0.2, 0.2, 0.2, 1.0);
@@ -304,6 +306,16 @@ static const GLfloat verteces_square[] = {
 	-1.0f, 0.0f, -1.0f,
 	1.0f, 0.0f, 1.0f
 }; 
+
+static const GLfloat uvs_square[] = {
+	1.0f, 1.0f - 0.0f,
+	0.0f, 1.0f - 0.0f,
+	0.0f, 1.0f - 1.0f,
+
+	1.0f, 1.0f - 1.0f,
+	1.0f, 1.0f - 0.0f,
+	0.0f, 1.0f - 1.0f
+};
 
 static const GLfloat verteces_square_normal[] = {
 	-6.0f, -0.5f, -11.0f,
@@ -414,8 +426,10 @@ ShaderDrawer::ShaderDrawer()
 	//planeTexture = loadBMP_custom("uvtemplate.bmp");
 	//planeTexture = loadBMP_custom("3.bmp");
 	//wallTexture = loadBMP_custom("galaxy_1.bmp");
-	floorTexture = loadBMP_custom("galaxy_2.bmp");
-
+	//floorTexture = loadBMP_custom("3.bmp");
+	wallTexture = loadBMP_custom("galaxy_2.bmp");
+	floorTexture = loadBMP_custom("galaxy_1.bmp");
+	
 	Projection = perspective(radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
 	LightAngle = 0;
 	// Camera matrix
@@ -452,6 +466,7 @@ void ShaderDrawer::drawGame(GameManager* gameManager)
 
 	updateLight();
 	drawGrid();
+	drawBackground();
 	drawBullets();
 	drawPlanetaries();
 	drawPlayer();
@@ -459,12 +474,13 @@ void ShaderDrawer::drawGame(GameManager* gameManager)
 	drawUI();
 
 	Model = mat4(1.0f);
-	Model = translate(Model, vec3(0.5f, 1.0f, -10.0f));
+	Model = translate(Model, vec3(0.5f, 1.0f, 0.0f));
 	MV = View * Model;
 	updateMatrix();
-	drawCube(vec4(1.0f, 0.0f, 0.0f, 1.0f), true);
+	//drawCube(vec4(0.0f, 0.0f, 0.0f, 1.0f), true);
 	//drawSquare(vec4(1.0f), true);
-	//drawTexturedCube(vec4(1.0f), floorTexture);
+	//drawCube(floorTexture, vec4(1.0f));
+	//drawSquare(floorTexture, vec4(1.0f));
 
 	glutSwapBuffers();
 }
@@ -649,11 +665,11 @@ void ShaderDrawer::drawGrid()
 	Model = scale(Model, vec3(6.0f, 1.0f, 11.0f));
 	MV = View * Model;
 	const vec4 white(1);
-	const vec4 blue(0.0f, 0.0f, 0.7f, 0.0f);
+	const vec4 blue(0.1f, 0.7f, 0.1f, 0.0f);
 	const vec4 red(1.0f, 0.0f, 0.0f, 0.0f);
 
 	updateMatrix();
-	drawSquare( white, true);
+	//drawSquare(white, true);
 
 	for (int i = 0; i < 40; i++)
 	{
@@ -674,6 +690,28 @@ void ShaderDrawer::drawGrid()
 		drawLine(blue);
 	}
 
+}
+
+void ShaderDrawer::drawBackground()
+{
+	const vec4 white(1);
+
+	Model = mat4(1.0f);
+	Model = translate(Model, vec3(0.0f, -1.0f, 0.0f));
+	Model = scale(Model, vec3(20.0f, 1.0f, 20.0f));
+	MV = View * Model;
+	updateMatrix();
+
+	drawSquare(floorTexture, white);
+
+	Model = mat4(1.0f);
+	Model = translate(Model, vec3(0.0f, 0.0f, -20.0f));
+	Model = rotate(Model, radians(90.0f), vec3(1.0f, 0.0f, 0.0f));
+	Model = scale(Model, vec3(20.0f, 1.0f, 20.0f));
+	MV = View * Model;
+	updateMatrix();
+
+	drawSquare(wallTexture, white);
 }
 
 void ShaderDrawer::drawPlanetaries()
@@ -982,7 +1020,6 @@ void drawCube(const vec4 color, bool mode)
 	glUniform1i(Mode, 0);
 
 	glUniform1i(FragTextureModeID, 0);
-	glUniform1i(VertexTextureModeID, 0);
 
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -1030,6 +1067,89 @@ void drawCube(const vec4 color, bool mode)
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(2);
 	glDeleteBuffers(1, &vertexbuffer);
+	glDeleteBuffers(1, &vertexbuffer2);
+}
+
+void drawCube(GLuint texture, const vec4 color)
+{
+
+	GLuint vertexbuffer;
+	glGenBuffers(1, &vertexbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_triangleCube), verteces_triangleCube, GL_STATIC_DRAW);
+
+	GLuint uvbuffer;
+	glGenBuffers(1, &uvbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(uvs_triangleCube), uvs_triangleCube, GL_STATIC_DRAW);
+
+	GLuint vertexbuffer2;
+	glGenBuffers(1, &vertexbuffer2);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_triangleCube), verteces_triangleCube, GL_STATIC_DRAW);
+
+	//glUniform4fv(g_uniformColor, 1, value_ptr(color));
+	vec4 material_diffuse(color.r * 0.8, color.g * 0.8, color.b * 0.8, 1.0);
+	vec4 ambient_product = light_ambient * color;
+	vec4 diffuse_product = light_diffuse * material_diffuse;
+	vec4 specular_product = light_specular * material_specular;
+
+	glUniform4fv(AmbientProduct, 1, value_ptr(ambient_product));
+	glUniform4fv(DiffuseProduct, 1, value_ptr(diffuse_product));
+	glUniform4fv(SpecularProduct, 1, value_ptr(specular_product));
+	glUniform4fv(LightPosition2, 1, value_ptr(light_position2));
+	glUniform1f(Shininess, material_shininess);
+	glUniform1i(Mode, 0);
+
+	glUniform1i(FragTextureModeID, 1);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	// Set our "myTextureSampler" sampler to use Texture Unit 0
+	glUniform1i(TextureID, 0);
+
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glVertexAttribPointer(
+		0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+	);
+
+	// 2nd attribute buffer : UVs
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	glVertexAttribPointer(
+		1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
+		2,                                // size : U+V => 2
+		GL_FLOAT,                         // type
+		GL_FALSE,                         // normalized?
+		0,                                // stride
+		(void*)0                          // array buffer offset
+	);
+
+	glEnableVertexAttribArray(2);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
+	glVertexAttribPointer(
+		2,                  // attribute. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+	);
+
+	glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
+
+
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(2);
+	glDeleteBuffers(1, &vertexbuffer);
+	glDeleteBuffers(1, &uvbuffer);
 	glDeleteBuffers(1, &vertexbuffer2);
 }
 
@@ -1097,6 +1217,70 @@ void drawSquare(const vec4 color, bool isFill)
 
 	glDisableVertexAttribArray(0);
 	glDeleteBuffers(1, &vertexbuffer);
+}
+
+void drawSquare(GLuint texture, const vec4 color)
+{
+	GLuint vertexbuffer;
+	glGenBuffers(1, &vertexbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_square), verteces_square, GL_STATIC_DRAW);
+
+	GLuint uvbuffer;
+	glGenBuffers(1, &uvbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(uvs_square), uvs_square, GL_STATIC_DRAW);
+
+	vec4 material_diffuse(color.r * 0.8, color.g * 0.8, color.b * 0.8, 1.0);
+
+	vec4 ambient_product = light_ambient * color;
+	vec4 diffuse_product = light_diffuse * color;
+	vec4 specular_product = light_specular * material_specular;
+
+	glUniform4fv(AmbientProduct, 1, value_ptr(ambient_product));
+	glUniform4fv(DiffuseProduct, 1, value_ptr(diffuse_product));
+	glUniform4fv(SpecularProduct, 1, value_ptr(specular_product));
+	glUniform4fv(LightPosition, 1, value_ptr(light_position));
+	glUniform1f(Shininess, material_shininess);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	// Set our "myTextureSampler" sampler to use Texture Unit 0
+	glUniform1i(TextureID, 0);
+
+	glUniform1i(FragTextureModeID, 1);
+
+	// 1rst attribute buffer : vertices
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glVertexAttribPointer(
+		0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+	);
+
+	// 2nd attribute buffer : UVs
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	glVertexAttribPointer(
+		1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
+		2,                                // size : U+V => 2
+		GL_FLOAT,                         // type
+		GL_FALSE,                         // normalized?
+		0,                                // stride
+		(void*)0                          // array buffer offset
+	);
+
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glDeleteBuffers(1, &vertexbuffer);
+	glDeleteBuffers(1, &uvbuffer);
 }
 
 void drawLine(const vec4 color)
@@ -1235,7 +1419,6 @@ void drawTexturedCube(const vec4 color, GLuint texture)
 	glUniform1f(Shininess, material_shininess);
 
 	glUniform1i(FragTextureModeID, 1);
-	glUniform1i(VertexTextureModeID, 1);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
@@ -1298,7 +1481,6 @@ void ShaderDrawer::updateShader(bool shading_mode) {
 	Shininess = glGetUniformLocation(programID, "Shininess");
 	Mode = glGetUniformLocation(programID, "Mode");
 
-	VertexTextureModeID = glGetUniformLocation(programID, "isTexturedVertex");
 	FragTextureModeID = glGetUniformLocation(programID, "isTexturedFrag");
 
 	glutSwapBuffers();

@@ -24,14 +24,14 @@ void Plane::move(Direction dir)
 	if (dir == Direction::DOWN)
 	{
 		position.y -= speed;
-		if (position.y < -17.0)
-			position.y = -17.0;
+		if (position.y < -7.0)
+			position.y = -7.0;
 	}
 	else if (dir == Direction::UP)
 	{
 		position.y += speed;
-		if (position.y > 17.0)
-			position.y = 17.0;
+		if (position.y > 7.0)
+			position.y = 7.0;
 	}
 	else if (dir == Direction::LEFT)
 	{
