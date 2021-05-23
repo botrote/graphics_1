@@ -13,7 +13,7 @@ public:
 	ShaderDrawer();
 	void drawGame(GameManager* gameManager);
 	void changeSize(int w, int h);
-	
+	void updateShader(bool shading_mode);
 private:
 	glm::mat4 Model;
 	glm::mat4 View;
@@ -35,5 +35,7 @@ private:
 	float get_attenuation(glm::vec4 pos);
 	void updateLight();
 };
+
+GLuint LoadShaders(const char* vertex_file_path, const char* fragment_file_path);
 
 

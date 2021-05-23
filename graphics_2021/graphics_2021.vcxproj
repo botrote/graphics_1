@@ -173,6 +173,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ColorFragmentShader.fragmentshader" />
+    <None Include="PhongFragmentShader.fragmentshader" />
+    <None Include="PhongVertexShader.vertexshader" />
     <None Include="TransformVertexShader.vertexshader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

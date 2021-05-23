@@ -21,11 +21,12 @@ void changeSize(int w, int h);
 
 GameManager* gameManager;
 ShaderDrawer* shaderDrawer;
+bool shading_mode;
 
 int main(int argc, char** argv) 
 {
 	gameManager = GameManager::getInstance();
-	
+	shading_mode = true;
 
 	init(argc, argv);
 
@@ -80,6 +81,12 @@ void drawerUpdate()
 void onkeyInput(unsigned char key, int x, int y)
 {
 	gameManager->onKeyInput(key);
+	if (key == 's') {
+		shading_mode = !shading_mode;
+		shaderDrawer->updateShader(shading_mode);
+
+	}
+
 }
 
 void onSpecialInput(int key, int x, int y)

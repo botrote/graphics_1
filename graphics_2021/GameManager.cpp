@@ -24,6 +24,7 @@ GameManager::GameManager()
 	allFail = false;
 	firstViewing = false;
 	hidden_rendering_mode = false;
+	shading_mode = true;
 	srand(time(0));
 
 	Pos plaPos1 = { Random::getRandomFloat(3, 7), Random::getRandomFloat(4, 9) };
@@ -285,6 +286,11 @@ bool GameManager::isFirstViewing()
 bool GameManager::isHiddenRenderingMode()
 {
 	return hidden_rendering_mode;
+}
+
+bool GameManager::isShadingMode()
+{
+	return shading_mode;
 }
 
 std::list<Planetary*> GameManager::getPlanetaries()

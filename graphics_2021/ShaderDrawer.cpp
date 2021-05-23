@@ -55,7 +55,7 @@ GLuint LoadShaders(const char* vertex_file_path, const char* fragment_file_path)
 
 
 	// Compile Vertex Shader
-	printf("Compiling shader : %s\n", vertex_file_path);
+	//printf("Compiling shader : %s\n", vertex_file_path);
 	char const* VertexSourcePointer = VertexShaderCode.c_str();
 	glShaderSource(VertexShaderID, 1, &VertexSourcePointer, NULL);
 	glCompileShader(VertexShaderID);
@@ -72,7 +72,7 @@ GLuint LoadShaders(const char* vertex_file_path, const char* fragment_file_path)
 
 
 	// Compile Fragment Shader
-	printf("Compiling shader : %s\n", fragment_file_path);
+	//printf("Compiling shader : %s\n", fragment_file_path);
 	char const* FragmentSourcePointer = FragmentShaderCode.c_str();
 	glShaderSource(FragmentShaderID, 1, &FragmentSourcePointer, NULL);
 	glCompileShader(FragmentShaderID);
@@ -89,7 +89,7 @@ GLuint LoadShaders(const char* vertex_file_path, const char* fragment_file_path)
 
 
 	// Link the program
-	printf("Linking program\n");
+	//printf("Linking program\n");
 	GLuint ProgramID = glCreateProgram();
 	glAttachShader(ProgramID, VertexShaderID);
 	glAttachShader(ProgramID, FragmentShaderID);
@@ -120,7 +120,7 @@ void drawSphere(float radius, const vec4 color, bool mode);
 void drawHiddenSphere(float width,  const vec4 color, GLuint MatrixMV, GLuint MatrixP, mat4 MV, mat4 P);
 void drawHiddenCube(float width, const vec4 color, GLuint MatrixMV, GLuint MatrixP, mat4 MV, mat4 P);
 
-GLint AmbientProduct, DiffuseProduct, SpecularProduct, LightPosition, LightPosition2, Shininess, Attenuation;
+GLint AmbientProduct, DiffuseProduct, SpecularProduct, LightPosition, LightPosition2, Shininess, Attenuation, Mode;
 vec4 light_position(0.0, 0.0, -1.0, 0.0);
 vec4 light_position2(0.0, 0.0, -1.0, 0.0);
 vec4 light_ambient(0.2, 0.2, 0.2, 1.0);
@@ -210,10 +210,10 @@ static const GLfloat verteces_square[] = {
 	1.0f, 0.0f, -1.0f
 }; 
 static const GLfloat verteces_square_normal[] = {
-	0.0f, 1.0f, 0.0f,
-	0.0f, 1.0f, 0.0f,
-	0.0f, 1.0f, 0.0f,
-	0.0f, 1.0f, 0.0f
+	-6.0f, -0.5f, -11.0f,
+	-6.0f, -0.5f, 11.0f,
+	6.0f, -0.5f, 11.0f,
+	6.0f, -0.5f, -11.0f
 };
 
 static const GLfloat verteces_line[] = {
@@ -235,7 +235,6 @@ void ShaderDrawer::changeSize(int w, int h)
 ShaderDrawer::ShaderDrawer()
 {
 	programID = LoadShaders("TransformVertexShader.vertexshader", "ColorFragmentShader.fragmentshader");
-
 	//g_uniformColor = glGetUniformLocation(programID, "color");
 	MatrixMV = glGetUniformLocation(programID, "ModelView");
 	MatrixP = glGetUniformLocation(programID, "Projection");
@@ -248,6 +247,7 @@ ShaderDrawer::ShaderDrawer()
 	LightPosition2 = glGetUniformLocation(programID, "LightPosition2");
 	Attenuation = glGetUniformLocation(programID, "Attenuation");
 	Shininess = glGetUniformLocation(programID, "Shininess");
+	Mode = glGetUniformLocation(programID, "Mode");
 
 	Projection = perspective(radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
 	LightAngle = 0;
@@ -741,11 +741,11 @@ void drawSphere(float radius, const vec4 color, bool mode)
 	vec4 diffuse_product = light_diffuse * material_diffuse;
 	vec4 specular_product = light_specular * material_specular;
 
+	glUniform1i(Mode, 1);
 	glUniform4fv(AmbientProduct, 1, value_ptr(ambient_product));
 	glUniform4fv(DiffuseProduct, 1, value_ptr(diffuse_product));
 	glUniform4fv(SpecularProduct, 1, value_ptr(specular_product));
 	glUniform4fv(LightPosition, 1, value_ptr(light_position));
-
 	glUniform4fv(LightPosition2, 1, value_ptr(light_position2));
 	glUniform1f(Shininess, material_shininess);
 
@@ -797,6 +797,7 @@ void drawCube(const vec4 color, bool mode)
 	glUniform4fv(SpecularProduct, 1, value_ptr(specular_product));
 	glUniform4fv(LightPosition2, 1, value_ptr(light_position2));
 	glUniform1f(Shininess, material_shininess);
+	glUniform1i(Mode, 0);
 
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -849,7 +850,7 @@ void drawSquare(const vec4 color, bool isFill)
 	GLuint vertexbuffer2;
 	glGenBuffers(1, &vertexbuffer2);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_square), verteces_square_normal, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_square_normal), verteces_square_normal, GL_STATIC_DRAW);
 
 	//glUniform4fv(g_uniformColor, 1, value_ptr(color));
 
@@ -887,6 +888,7 @@ void drawSquare(const vec4 color, bool isFill)
 	glUniform4fv(SpecularProduct, 1, value_ptr(specular_product));
 	glUniform4fv(LightPosition2, 1, value_ptr(light_position2));
 	glUniform1f(Shininess, material_shininess);
+	glUniform1i(Mode, 0);
 
 	if (isFill)
 		glDrawArrays(GL_QUADS, 0, 15);
@@ -916,6 +918,7 @@ void drawLine(const vec4 color)
 	glUniform4fv(SpecularProduct, 1, value_ptr(specular_product));
 	glUniform4fv(LightPosition2, 1, value_ptr(light_position2));
 	glUniform1f(Shininess, material_shininess);
+	glUniform1i(Mode, 0);
 
 	// 1rst attribute buffer : vertices
 	glEnableVertexAttribArray(0);
@@ -982,7 +985,7 @@ float ShaderDrawer::get_attenuation(vec4 pos) {
 	float d = length(sub);
 	float dd = length(sub * sub);
 
-	float result = 5 / (1 + d + dd);
+	float result = 1 / (1 + d + dd);
 	return result;
 
 }
@@ -994,8 +997,29 @@ void ShaderDrawer::updateLight() {
 		LightAngle = 0;
 
 
-	light_position2 = vec4 ( -30*cos(LightAngle)-10, 30*sin(LightAngle), 5.0, 0.0);
+	light_position2 = vec4 ( -30*cos(LightAngle)-10, 30*sin(LightAngle), 10.0, 0.0);
 
+}
+
+void ShaderDrawer::updateShader(bool shading_mode) {
+
+	if (shading_mode)
+		programID = LoadShaders("TransformVertexShader.vertexshader", "ColorFragmentShader.fragmentshader");
+	else
+		programID = LoadShaders("PhongVertexShader.vertexshader", "PhongFragmentShader.fragmentshader");
+
+	MatrixMV = glGetUniformLocation(programID, "ModelView");
+	MatrixP = glGetUniformLocation(programID, "Projection");
+
+	// Initialize shader lighting parameters
+	AmbientProduct = glGetUniformLocation(programID, "AmbientProduct");
+	DiffuseProduct = glGetUniformLocation(programID, "DiffuseProduct");
+	SpecularProduct = glGetUniformLocation(programID, "SpecularProduct");
+	LightPosition = glGetUniformLocation(programID, "LightPosition");
+	LightPosition2 = glGetUniformLocation(programID, "LightPosition2");
+	Attenuation = glGetUniformLocation(programID, "Attenuation");
+	Shininess = glGetUniformLocation(programID, "Shininess");
+	Mode = glGetUniformLocation(programID, "Mode");
 }
 
 // glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
