@@ -52,7 +52,7 @@ void main(){
 	float Kd2 = max( dot(L2, N), 0.0 );
 	vec4 diffuse2 =  Kd2 * DiffuseProduct;
 
-	float Ks2 = pow( max(dot(N, H2), 0.0), Shininess );
+	float Ks2 = pow( max(dot(N, H2), 0.0), 10 );
 	vec4 specular2 = Ks2 * SpecularProduct;
 
 	if( dot(L2, N) < 0.0 ) specular2 = vec4(0.0, 0.0, 0.0, 1.0);
@@ -60,7 +60,7 @@ void main(){
 	if (Mode==1)
 		color = color1 + ambient + diffuse2 + specular2;
 	else
-		color =  0.8 * diffuse2 + 0.8 * specular2;
+		color =  diffuse2 + specular2 ;
 	color.a = 1.0;
 
 

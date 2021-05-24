@@ -81,7 +81,7 @@ void main()
 	if (Mode==1)
 		fColor = fColor1 + fColor3;
 	else
-		fColor = 0.8 * diffuse2 + 0.8 * specular2;
+		fColor = diffuse2 + specular2;
 	fColor.a = 1.0;
 
 	if(isTexturedFrag)

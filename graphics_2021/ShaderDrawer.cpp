@@ -298,10 +298,47 @@ static const GLfloat verteces_lineCube[] = {
 	1.0, -1.0, -1.0,
 
 	1.0, 1.0, -1.0,
-	1.0, 1.0, 1.0,
+	1.0, 1.0, 1.0
 
 };
+static const GLfloat verteces_lineCube_normal[] = {
 
+	1.0, 1.0, 1.0,
+	-1.0, 1.0, 1.0,
+
+	-1.0, 1.0, 1.0,
+	1.0, -1.0, 1.0,
+
+	1.0, 1.0, 1.0,
+	1.0, 1.0, -1.0,
+
+	-1.0, 1.0, -1.0,
+	1.0, 1.0, -1.0,
+
+	-1.0, 1.0, -1.0,
+	-1.0, -1.0, -1.0,
+
+	-1.0, 1.0, -1.0,
+	-1.0, 1.0, 1.0,
+
+	1.0, -1.0, -1.0,
+	-1.0, -1.0, -1.0,
+
+	1.0, -1.0, -1.0,
+	1.0, 1.0, -1.0,
+
+	1.0, -1.0, -1.0,
+	1.0, -1.0, 1.0,
+
+	-1.0, -1.0, 1.0,
+	1.0, -1.0,1.0,
+
+	-1.0, -1.0, 1.0,
+	-1.0, 1.0, 1.0,
+
+	-1.0, -1.0, 1.0,
+	-1.0, -1.0, -1.0
+};
 static const GLfloat verteces_square[] = {
 	-1.0f, 0.0f, -1.0f,
 	-1.0f, 0.0f, 1.0f,
@@ -599,7 +636,7 @@ void ShaderDrawer::drawEnemy()
 	if (isTextured)
 	{
 		updateMatrix();
-		drawCube(enemyTexture, color);
+		drawCube(itemTexture, color);
 	}
 	else if (hidden_rendering_mode) 
 	{
@@ -618,7 +655,7 @@ void ShaderDrawer::drawEnemy()
 	if (isTextured)
 	{
 		updateMatrix();
-		drawCube(enemyTexture, color);
+		drawCube(itemTexture, color);
 	}
 	else if (hidden_rendering_mode) 
 	{
@@ -638,7 +675,7 @@ void ShaderDrawer::drawEnemy()
 	if (isTextured)
 	{
 		updateMatrix();
-		drawCube(enemyTexture, color);
+		drawCube(itemTexture, color);
 	}
 	else if (hidden_rendering_mode) 
 	{
@@ -658,7 +695,7 @@ void ShaderDrawer::drawEnemy()
 	if (isTextured)
 	{
 		updateMatrix();
-		drawCube(enemyTexture, color);
+		drawCube(itemTexture, color);
 	}
 	if (hidden_rendering_mode) 
 	{
@@ -700,7 +737,7 @@ void ShaderDrawer::drawPlayer()
 	if (isTextured)
 	{
 		updateMatrix();
-		drawCube(playerTexture, color);
+		drawCube(itemTexture, color);
 	}
 	else if (hidden_rendering_mode) 
 	{
@@ -720,7 +757,7 @@ void ShaderDrawer::drawPlayer()
 	if (isTextured)
 	{
 		updateMatrix();
-		drawCube(playerTexture, color);
+		drawCube(itemTexture, color);
 	}
 	else if (hidden_rendering_mode) 
 	{
@@ -740,7 +777,7 @@ void ShaderDrawer::drawPlayer()
 	if (isTextured)
 	{
 		updateMatrix();
-		drawCube(playerTexture, color);
+		drawCube(itemTexture, color);
 	}
 	else if (hidden_rendering_mode) 
 	{
@@ -760,7 +797,7 @@ void ShaderDrawer::drawPlayer()
 	if (isTextured)
 	{
 		updateMatrix();
-		drawCube(playerTexture, color);
+		drawCube(itemTexture, color);
 	}
 	else if (hidden_rendering_mode) 
 	{
@@ -805,11 +842,13 @@ void ShaderDrawer::drawBullets()
 		}
 		else
 		{
+			Model = rotate(Model, radians(45.0f), vec3(0.0f, 0.0f, 1.0f));
+			Model = rotate(Model, radians(45.0f), vec3(0.0f, 1.0f, 0.0f));
 			MV = View * Model;
 			updateMatrix();
 			//drawSphere(1, color, true);
 			if (GameManager::getInstance()->isTextured())
-				drawCube(bulletTexture, color);
+				drawCube(itemTexture, color);
 			else
 				drawCube(color, true);
 		}
@@ -1313,7 +1352,7 @@ void drawCube(const vec4 color, bool mode)
 	if (mode)
 		glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_triangleCube), verteces_triangleCube, GL_STATIC_DRAW);
 	else
-		glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_lineCube), verteces_lineCube, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_triangleCube), verteces_lineCube, GL_STATIC_DRAW);
 
 	GLuint uvbuffer;
 	glGenBuffers(1, &uvbuffer);
@@ -1324,13 +1363,13 @@ void drawCube(const vec4 color, bool mode)
 	glGenBuffers(1, &vertexbuffer2);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
 
+	light_position2 = vec4(-1, -1, 1, 1) * light_position2;
 	if (mode)
 	{
-		light_position2 = vec4(-1, -1, 1, 1) * light_position2;
 		glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_triangleCube), verteces_triangleCube_normal, GL_STATIC_DRAW);
 	}
 	else
-		glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_lineCube), verteces_lineCube, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_lineCube), verteces_lineCube_normal, GL_STATIC_DRAW);
 
 	//glUniform4fv(g_uniformColor, 1, value_ptr(color));
 
@@ -1385,13 +1424,13 @@ void drawCube(const vec4 color, bool mode)
 	if (mode == true)
 	{
 		glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
-		light_position2 = vec4(-1, -1, 1, 1) * light_position2;
 	}
 	else
 	{
 		glDrawArrays(GL_LINES, 0, 2 * 12);
 	}
 
+	light_position2 = vec4(-1, -1, 1, 1) * light_position2;
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(2);
 	glDeleteBuffers(1, &vertexbuffer);
@@ -1851,7 +1890,7 @@ void ShaderDrawer::updateLight() {
 	}
 
 
-	light_position2 = vec4 ( -30*cos(LightAngle)-10, 30*sin(LightAngle), -10.0, 1.0);
+	light_position2 = vec4 ( -30*cos(LightAngle)-10, 30*sin(LightAngle), 10.0, 1.0);
 
 }
 

@@ -23,7 +23,7 @@ GameManager::GameManager()
 	allPass = false;
 	allFail = false;
 	firstViewing = false;
-	hidden_rendering_mode = false;
+	hidden_rendering_mode = true;
 	shading_mode = true;
 	textured = false;
 	normalMode = false;
