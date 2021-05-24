@@ -87,6 +87,9 @@ void GameManager::onKeyInput(char key)
 	case 'r':
 		hidden_rendering_mode = !hidden_rendering_mode;
 		break;
+	case 's':
+		hidden_rendering_mode = true;
+		break;
 	case 't':
 		textured = !textured;
 		break;
