@@ -303,20 +303,20 @@ static const GLfloat verteces_lineCube[] = {
 };
 
 static const GLfloat verteces_square[] = {
-	//-1.0f, 0.0f, -1.0f,
-	//-1.0f, 0.0f, 1.0f,
-	//1.0f, 0.0f, 1.0f,
+	-1.0f, 0.0f, -1.0f,
+	-1.0f, 0.0f, 1.0f,
+	1.0f, 0.0f, 1.0f,
 
-	//1.0f, 0.0f, -1.0f,
-	//-1.0f, 0.0f, -1.0f,
-	//1.0f, 0.0f, 1.0f
+	1.0f, 0.0f, -1.0f,
+	-1.0f, 0.0f, -1.0f,
+	1.0f, 0.0f, 1.0f
 
-	-1.0f,-1.0f,0.0f,
-	-1.0f,1.0f,0.0f,
-	1.0f,-1.0f,1.0f,
-	1.0f,1.0f,0.0f,
-	-1.0f,1.0f,0.0f,
-	1.0f,-1.0f,1.0f
+	//-1.0f,-1.0f,0.0f,
+	//-1.0f,1.0f,0.0f,
+	//1.0f,-1.0f,0.0f,
+	//1.0f,1.0f,0.0f,
+	//-1.0f,1.0f,0.0f,
+	//1.0f,-1.0f,0.0f
 
 }; 
 
@@ -336,12 +336,20 @@ static const GLfloat verteces_square_normal[] = {
 	//1.0f, 1.0f, 1.0f,
 	//1.0f, 1.0f, -1.0f
 
-	-0.7f, 0.0f, 0.7f,
-	0.0f, 1.0f, 0.0f,
-	0.58f, -0.58f, 0.58f,
-	0.7f, 0.0f, 0.7f,
-	0.0f, 1.0f, 0.0f,
-	0.58f, -0.58f, 0.58f
+	1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, -1.0f,
+	-1.0f, 1.0f, -1.0f,
+
+	-1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f, -1.0f
+
+	//-0.7f, 0.0f, 0.7f,
+	//0.0f, 1.0f, 0.0f,
+	//0.58f, -0.58f, 0.58f,
+	//0.7f, 0.0f, 0.7f,
+	//0.0f, 1.0f, 0.0f,
+	//0.58f, -0.58f, 0.58f
 };
 
 static const GLfloat verteces_line[] = {
@@ -1317,11 +1325,15 @@ void drawCube(const vec4 color, bool mode)
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
 
 	if (mode)
-		glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_triangleCube), verteces_triangleCube, GL_STATIC_DRAW);
+	{
+		light_position2 = vec4(-1, -1, 1, 1) * light_position2;
+		glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_triangleCube), verteces_triangleCube_normal, GL_STATIC_DRAW);
+	}
 	else
 		glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_lineCube), verteces_lineCube, GL_STATIC_DRAW);
 
 	//glUniform4fv(g_uniformColor, 1, value_ptr(color));
+
 	vec4 material_diffuse(color.r * 0.8, color.g * 0.8, color.b * 0.8, 1.0);
 	vec4 ambient_product = light_ambient * color;
 	vec4 diffuse_product = light_diffuse * material_diffuse;
@@ -1373,6 +1385,7 @@ void drawCube(const vec4 color, bool mode)
 	if (mode == true)
 	{
 		glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
+		light_position2 = vec4(-1, -1, 1, 1) * light_position2;
 	}
 	else
 	{
@@ -1588,19 +1601,20 @@ void drawSquare(GLuint texture, const vec4 color)
 		(void*)0                          // array buffer offset
 	);
 
+
+	glEnableVertexAttribArray(2);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
+	glVertexAttribPointer(
+		2,                  // attribute. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+	);
 	if (ShadingMode)
-	{
-		glEnableVertexAttribArray(2);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
-		glVertexAttribPointer(
-			2,                  // attribute. No particular reason for 0, but must match the layout in the shader.
-			3,                  // size
-			GL_FLOAT,           // type
-			GL_FALSE,           // normalized?
-			0,                  // stride
-			(void*)0            // array buffer offset
-		);
-	}
+		light_position2 = vec4(-1, 1, 1, 1) * light_position2;
+
 	vec4 material_diffuse(color.r * 0.8, color.g * 0.8, color.b * 0.8, 1.0);
 
 	vec4 ambient_product = light_ambient * color;
@@ -1619,7 +1633,7 @@ void drawSquare(GLuint texture, const vec4 color)
 
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
-	if (ShadingMode)
+	if(ShadingMode)
 		glDisableVertexAttribArray(2);
 	glDeleteBuffers(1, &vertexbuffer);
 	glDeleteBuffers(1, &uvbuffer);
