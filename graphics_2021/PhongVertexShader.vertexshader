@@ -23,7 +23,7 @@ void main()
 	fN = mat3(transpose(inverse(ModelView)))*vNormal;
 	fE = -(ModelView * pos).xyz;
 	fL = (LightPosition).xyz;
-	fL2 = (LightPosition2-ModelView* pos).xyz;
+	fL2 = (LightPosition2).xyz;
 
 	gl_Position = Projection*ModelView*pos;
 

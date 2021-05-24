@@ -373,6 +373,45 @@ static const GLfloat verteces_triangleCube[] = {
 		 1.0f,-1.0f, 1.0f
 };
 
+static const GLfloat verteces_triangleCube_normal[] = {
+		1.0f,1.0f,1.0f,
+		1.0f,1.0f, -1.0f,
+		1.0f,- 1.0f,- 1.0f,
+		-1.0f, -1.0f,1.0f,
+		1.0f,1.0f,1.0f,
+		1.0f, -1.0f,1.0f,
+		-1.0f,1.0f, -1.0f,
+		1.0f,1.0f,1.0f,
+		 -1.0f,1.0f,1.0f,
+		 -1.0f, -1.0f,1.0f,
+		 -1.0f,1.0f,1.0f,
+		1.0f,1.0f,1.0f,
+		1.0f,1.0f,1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f,1.0f,
+		-1.0f,1.0f, -1.0f,
+		1.0f,1.0f, -1.0f,
+		1.0f,1.0f,1.0f,
+		1.0f,- 1.0f, -1.0f,
+		1.0f,1.0f, -1.0f,
+		- 1.0f,1.0f, -1.0f,
+		 -1.0f,- 1.0f, -1.0f,
+		 -1.0f,1.0f,1.0f,
+		 -1.0f, -1.0f,1.0f,
+		 -1.0f,1.0f,1.0f,
+		 -1.0f, -1.0f, -1.0f,
+		 -1.0f,1.0f, -1.0f,
+		 -1.0f, -1.0f, -1.0f,
+		 -1.0f, -1.0f,1.0f,
+		1.0f, -1.0f,1.0f,
+		 -1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f,1.0f,
+		1.0f, -1.0f, -1.0f,
+		- 1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		- 1.0f,1.0f, -1.0f
+};
+
 static const GLfloat uvs_triangleCube[] = {
 	0.000059f, 1.0f - 0.000004f,
 	0.000103f, 1.0f - 0.336048f,
@@ -521,7 +560,7 @@ void ShaderDrawer::drawEnemy()
 	float enemyX = enemy->getPos().x;
 	float enemyZ = -enemy->getPos().y;
 	Color enemyColor = enemy->getColor();
-	const vec4 color = 0.5f * vec4(enemyColor.r, enemyColor.g, enemyColor.b, 0.0f);
+	const vec4 color = vec4(enemyColor.r, enemyColor.g, enemyColor.b, 0.0f);
 
 	Model = mat4(1.0f);
 	Model = translate(mat4(1.0f), vec3(enemyX, 1.0f, enemyZ));
@@ -621,7 +660,7 @@ void ShaderDrawer::drawPlayer()
 	float playerX = player->getPos().x;
 	float playerZ = -player->getPos().y;
 	Color playerColor = player->getColor();
-	const vec4 color = 0.5f * vec4(playerColor.r, playerColor.g, playerColor.b, 0.0f);
+	const vec4 color = vec4(playerColor.r, playerColor.g, playerColor.b, 0.0f);
 
 	Model = mat4(1.0f);
 	MV = View * Model;
@@ -1269,6 +1308,8 @@ void drawCube(const vec4 color, bool mode)
 	vec4 diffuse_product = light_diffuse * material_diffuse;
 	vec4 specular_product = light_specular * material_specular;
 
+	if (mode)
+		light_position2 = vec4(-1, -1, 1, 1) * light_position2;
 	glUniform4fv(AmbientProduct, 1, value_ptr(ambient_product));
 	glUniform4fv(DiffuseProduct, 1, value_ptr(diffuse_product));
 	glUniform4fv(SpecularProduct, 1, value_ptr(specular_product));
@@ -1325,6 +1366,9 @@ void drawCube(const vec4 color, bool mode)
 	glDisableVertexAttribArray(2);
 	glDeleteBuffers(1, &vertexbuffer);
 	glDeleteBuffers(1, &vertexbuffer2);
+
+	if (mode)
+		light_position2 = vec4(-1, -1, 1, 1) * light_position2;
 }
 
 void drawCube(GLuint texture, const vec4 color)
@@ -1343,7 +1387,7 @@ void drawCube(GLuint texture, const vec4 color)
 	GLuint vertexbuffer2;
 	glGenBuffers(1, &vertexbuffer2);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_triangleCube), verteces_triangleCube, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_triangleCube), verteces_triangleCube_normal, GL_STATIC_DRAW);
 
 	//glUniform4fv(g_uniformColor, 1, value_ptr(color));
 	vec4 material_diffuse(color.r * 0.8, color.g * 0.8, color.b * 0.8, 1.0);
@@ -1351,6 +1395,7 @@ void drawCube(GLuint texture, const vec4 color)
 	vec4 diffuse_product = light_diffuse * material_diffuse;
 	vec4 specular_product = light_specular * material_specular;
 
+	light_position2 = vec4(-1, -1, 1, 1) * light_position2;
 	glUniform4fv(AmbientProduct, 1, value_ptr(ambient_product));
 	glUniform4fv(DiffuseProduct, 1, value_ptr(diffuse_product));
 	glUniform4fv(SpecularProduct, 1, value_ptr(specular_product));
@@ -1408,6 +1453,7 @@ void drawCube(GLuint texture, const vec4 color)
 	glDeleteBuffers(1, &vertexbuffer);
 	glDeleteBuffers(1, &uvbuffer);
 	glDeleteBuffers(1, &vertexbuffer2);
+	light_position2 = vec4(-1, -1, 1, 1) * light_position2;
 }
 
 void drawSquare(const vec4 color, bool isFill)
@@ -1492,20 +1538,6 @@ void drawSquare(GLuint texture, const vec4 color)
 	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(uvs_square), uvs_square, GL_STATIC_DRAW);
 
-	vec4 material_diffuse(color.r * 0.8, color.g * 0.8, color.b * 0.8, 1.0);
-
-	vec4 ambient_product = light_ambient * color;
-	vec4 diffuse_product = light_diffuse * color;
-	vec4 specular_product = light_specular * material_specular;
-
-
-	glUniform1i(Mode, 0);
-	glUniform4fv(AmbientProduct, 1, value_ptr(ambient_product));
-	glUniform4fv(DiffuseProduct, 1, value_ptr(diffuse_product));
-	glUniform4fv(SpecularProduct, 1, value_ptr(specular_product));
-	glUniform4fv(LightPosition, 1, value_ptr(light_position));
-	glUniform1f(Shininess, material_shininess);
-
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	// Set our "myTextureSampler" sampler to use Texture Unit 0
@@ -1537,11 +1569,39 @@ void drawSquare(GLuint texture, const vec4 color)
 		(void*)0                          // array buffer offset
 	);
 
+	if (ShadingMode)
+	{
+		glEnableVertexAttribArray(2);
+		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+		glVertexAttribPointer(
+			2,                  // attribute. No particular reason for 0, but must match the layout in the shader.
+			3,                  // size
+			GL_FLOAT,           // type
+			GL_FALSE,           // normalized?
+			0,                  // stride
+			(void*)0            // array buffer offset
+		);
+	}
+	vec4 material_diffuse(color.r * 0.8, color.g * 0.8, color.b * 0.8, 1.0);
+
+	vec4 ambient_product = light_ambient * color;
+	vec4 diffuse_product = light_diffuse * color;
+	vec4 specular_product = light_specular * material_specular;
+
+
+	glUniform4fv(AmbientProduct, 1, value_ptr(ambient_product));
+	glUniform4fv(DiffuseProduct, 1, value_ptr(diffuse_product));
+	glUniform4fv(SpecularProduct, 1, value_ptr(specular_product));
+	glUniform4fv(LightPosition2, 1, value_ptr(light_position2));
+	glUniform1f(Shininess, material_shininess);
+	glUniform1i(Mode, 0);
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
+	if (ShadingMode)
+		glDisableVertexAttribArray(2);
 	glDeleteBuffers(1, &vertexbuffer);
 	glDeleteBuffers(1, &uvbuffer);
 }
@@ -1627,12 +1687,17 @@ void drawTexturedCube(const vec4 color, GLuint texture)
 	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_triangleCube), verteces_triangleCube, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_lineCube), verteces_lineCube, GL_STATIC_DRAW);
 
 	GLuint uvbuffer;
 	glGenBuffers(1, &uvbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(uvs_triangleCube), uvs_triangleCube, GL_STATIC_DRAW);
+
+	GLuint vertexbuffer2;
+	glGenBuffers(1, &vertexbuffer2);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_lineCube), verteces_lineCube, GL_STATIC_DRAW);
 
 	// 1rst attribute buffer : vertices
 	glEnableVertexAttribArray(0);
@@ -1675,10 +1740,12 @@ void drawTexturedCube(const vec4 color, GLuint texture)
 	vec4 diffuse_product = light_diffuse * material_diffuse;
 	vec4 specular_product = light_specular * material_specular;
 
+	//light_position2 = vec4(1, -1, 1, 1) * light_position2;
+	glUniform1i(Mode, 0);
 	glUniform4fv(AmbientProduct, 1, value_ptr(ambient_product));
 	glUniform4fv(DiffuseProduct, 1, value_ptr(diffuse_product));
 	glUniform4fv(SpecularProduct, 1, value_ptr(specular_product));
-	glUniform4fv(LightPosition, 1, value_ptr(light_position));
+	glUniform4fv(LightPosition2, 1, value_ptr(light_position2));
 	glUniform1f(Shininess, material_shininess);
 
 	glUniform1i(FragTextureModeID, 1);
@@ -1691,9 +1758,12 @@ void drawTexturedCube(const vec4 color, GLuint texture)
 	// Draw the triangle !
 	glDrawArrays(GL_TRIANGLES, 0, 12 * 3); // 12*3 indices starting at 0 -> 12 triangles
 
+	//light_position2 = vec4(1, -1, 1, 1) * light_position2;
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(2);
 	glDeleteBuffers(1, &vertexbuffer);
+	glDeleteBuffers(1, &vertexbuffer2);
 	glDeleteBuffers(1, &uvbuffer);
 
 }
