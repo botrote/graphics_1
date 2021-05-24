@@ -15,6 +15,7 @@ uniform vec4 LightPosition;
 uniform vec4 LightPosition2;
 uniform float Attenuation;
 uniform float Shininess;
+uniform int Mode;
 
 void main(){	
 
@@ -56,7 +57,10 @@ void main(){
 
 	if( dot(L2, N) < 0.0 ) specular2 = vec4(0.0, 0.0, 0.0, 1.0);
 		
-	color = color1 + ambient + diffuse2 + specular2;
+	if (Mode==1)
+		color = color1 + ambient + diffuse2 + specular2;
+	else
+		color =  diffuse2 + specular2;
 	color.a = 1.0;
 
 

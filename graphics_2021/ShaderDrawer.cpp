@@ -303,13 +303,21 @@ static const GLfloat verteces_lineCube[] = {
 };
 
 static const GLfloat verteces_square[] = {
-	-1.0f, 0.0f, -1.0f,
-	-1.0f, 0.0f, 1.0f,
-	1.0f, 0.0f, 1.0f,
+	//-1.0f, 0.0f, -1.0f,
+	//-1.0f, 0.0f, 1.0f,
+	//1.0f, 0.0f, 1.0f,
 
-	1.0f, 0.0f, -1.0f,
-	-1.0f, 0.0f, -1.0f,
-	1.0f, 0.0f, 1.0f
+	//1.0f, 0.0f, -1.0f,
+	//-1.0f, 0.0f, -1.0f,
+	//1.0f, 0.0f, 1.0f
+
+	-1.0f,-1.0f,0.0f,
+	-1.0f,1.0f,0.0f,
+	1.0f,-1.0f,1.0f,
+	1.0f,1.0f,0.0f,
+	-1.0f,1.0f,0.0f,
+	1.0f,-1.0f,1.0f
+
 }; 
 
 static const GLfloat uvs_square[] = {
@@ -323,15 +331,26 @@ static const GLfloat uvs_square[] = {
 };
 
 static const GLfloat verteces_square_normal[] = {
-	-1.0f, 1.0f, -1.0f,
-	-1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, -1.0f
+	//-1.0f, 1.0f, -1.0f,
+	//-1.0f, 1.0f, 1.0f,
+	//1.0f, 1.0f, 1.0f,
+	//1.0f, 1.0f, -1.0f
+
+	-0.7f, 0.0f, 0.7f,
+	0.0f, 1.0f, 0.0f,
+	0.58f, -0.58f, 0.58f,
+	0.7f, 0.0f, 0.7f,
+	0.0f, 1.0f, 0.0f,
+	0.58f, -0.58f, 0.58f
 };
 
 static const GLfloat verteces_line[] = {
 	-1.0f, 0.0f, 0.0f,
 	1.0f, 0.0f, 0.0f,
+};
+static const GLfloat verteces_line_normal[] = {
+	-1.0f, 1.0f, 0.0f,
+	1.0f, 1.0f, 0.0f,
 };
 
 static const GLfloat verteces_triangleCube[] = {
@@ -1528,6 +1547,10 @@ void drawSquare(GLuint texture, const vec4 color)
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_square), verteces_square, GL_STATIC_DRAW);
+	GLuint vertexbuffer2;
+	glGenBuffers(1, &vertexbuffer2);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_square), verteces_square_normal, GL_STATIC_DRAW);
 
 	GLuint uvbuffer;
 	glGenBuffers(1, &uvbuffer);
@@ -1568,7 +1591,7 @@ void drawSquare(GLuint texture, const vec4 color)
 	if (ShadingMode)
 	{
 		glEnableVertexAttribArray(2);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
 		glVertexAttribPointer(
 			2,                  // attribute. No particular reason for 0, but must match the layout in the shader.
 			3,                  // size
@@ -1609,7 +1632,12 @@ void drawLine(const vec4 color)
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_line), verteces_line, GL_STATIC_DRAW);
 
-	//glUniform4fv(g_uniformColor, 1, value_ptr(color));
+	GLuint vertexbuffer2;
+	glGenBuffers(1, &vertexbuffer2);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verteces_line), verteces_line_normal, GL_STATIC_DRAW);
+
+
 	vec4 material_diffuse(color.r * 0.8, color.g * 0.8, color.b * 0.8, 1.0);
 
 	vec4 ambient_product = light_ambient * color;
@@ -1628,6 +1656,16 @@ void drawLine(const vec4 color)
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glVertexAttribPointer(
 		0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+	);
+	glEnableVertexAttribArray(2);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer2);
+	glVertexAttribPointer(
+		2,                  // attribute. No particular reason for 0, but must match the layout in the shader.
 		3,                  // size
 		GL_FLOAT,           // type
 		GL_FALSE,           // normalized?
