@@ -1498,6 +1498,8 @@ void drawSquare(GLuint texture, const vec4 color)
 	vec4 diffuse_product = light_diffuse * color;
 	vec4 specular_product = light_specular * material_specular;
 
+
+	glUniform1i(Mode, 0);
 	glUniform4fv(AmbientProduct, 1, value_ptr(ambient_product));
 	glUniform4fv(DiffuseProduct, 1, value_ptr(diffuse_product));
 	glUniform4fv(SpecularProduct, 1, value_ptr(specular_product));

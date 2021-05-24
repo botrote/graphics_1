@@ -65,10 +65,10 @@ void main()
 	}
 	
 	float Kd3 = max(dot(L2, N), 0.0);
-	vec4 diffuse3 = Kd3*DiffuseProduct;
+	vec4 diffuse3 = 2*Kd3*DiffuseProduct;
 
 	float Ks3 = pow(max(dot(N, H2), 0.0), 10);
-	vec4 specular3 = Ks3*SpecularProduct;
+	vec4 specular3 = 2*Ks3*SpecularProduct;
 	
 	// discard the specular highlight if the light¡¯s behind the vertex
 	if( dot(L2, N) < 0.0 ) {
